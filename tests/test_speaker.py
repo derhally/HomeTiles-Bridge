@@ -311,11 +311,16 @@ class MediaPlayerPlatformTest(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(SPEAKER.valid_request_id(payload["id"]))
         self.assertEqual(player._last_request_id, payload["id"])
 
-    async def test_play_refuses_https_before_sending(self):
+    async def test_play_sends_https_urls(self):
+        player = await self.start()
+        await player.async_play_media("music", "https://ha.example/clip.mp3")
+        self.assertEqual(self.mqtt.published[0][1]["url"], "https://ha.example/clip.mp3")
+
+    async def test_play_refuses_relative_urls_before_sending(self):
         player = await self.start()
         with self.assertRaises(FakeHomeAssistantError) as raised:
-            await player.async_play_media("music", "https://ha.example/clip.mp3")
-        self.assertEqual(raised.exception.translation_key, "speaker_https_unsupported")
+            await player.async_play_media("music", "ftp://ha.example/clip.mp3")
+        self.assertEqual(raised.exception.translation_key, "speaker_invalid_url")
         self.assertEqual(self.mqtt.published, [])
 
     async def test_volume_mute_stop(self):

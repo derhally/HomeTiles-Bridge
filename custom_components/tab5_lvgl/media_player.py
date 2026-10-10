@@ -169,7 +169,9 @@ class HomeTilesSpeaker(MediaPlayerEntity):
         # Relative /api/... URLs become absolute (internal URL first) and are
         # signed, so the panel can fetch them without a token of its own.
         url = async_process_play_media_url(self.hass, media_id)
-        error = playable_url_error(url)
+        # The panel downloads https with the same unverified TLS client as its
+        # screensaver image URL.
+        error = playable_url_error(url, https_allowed=True)
         if error is not None:
             raise HomeAssistantError(translation_domain=DOMAIN,
                                      translation_key=f"speaker_{error}")

@@ -6,7 +6,7 @@ is ``src/audio/speaker_contract.h`` in the firmware.
 
 MQTT contract (base = the panel base topic):
 - ``{base}/cmnd/audio``: Bridge to panel, not retained, JSON
-  ``{"v": 1, "op": "play", "id": "<hex>", "url": "http://..."}``,
+  ``{"v": 1, "op": "play", "id": "<hex>", "url": "http(s)://..."}``,
   ``{"v": 1, "op": "stop"}``, ``{"v": 1, "op": "volume", "volume": 0.5}`` or
   ``{"v": 1, "op": "mute", "muted": true}``. Sealed on the encrypted command
   channel (data name ``audio``) once the panel is paired, because play URLs
@@ -117,8 +117,8 @@ def build_mute_command(muted: bool) -> str:
 def playable_url_error(url: Any, https_allowed: bool = False) -> str | None:
     """Why the panel cannot fetch url, or None.
 
-    The panel needs an absolute URL it can reach on its own; ESP32-P4 panels
-    refuse https downloads (Wi-Fi over SDIO cannot afford TLS).
+    The panel needs an absolute URL it can reach on its own. Firmware of the
+    first speaker beta refused https; current firmware accepts it.
     """
     if not isinstance(url, str) or not url or len(url) > AUDIO_MAX_URL_LENGTH:
         return "invalid_url"

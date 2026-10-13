@@ -218,6 +218,20 @@
           "60min": "60 min",
           "never": "Never"
         }
+      },
+      "pipeline": {
+        "name": "Assistant",
+        "state": {
+          "preferred": "Preferred"
+        }
+      },
+      "vad_sensitivity": {
+        "name": "Finished speaking detection",
+        "state": {
+          "default": "Default",
+          "aggressive": "Aggressive",
+          "relaxed": "Relaxed"
+        }
       }
     },
     "switch": {
@@ -290,7 +304,7 @@
       "message": "The display can only play an absolute http:// URL."
     },
     "speaker_https_unsupported": {
-      "message": "The display cannot download https:// URLs. Set an http:// local network URL for Home Assistant (Settings \u2192 System \u2192 Network)."
+      "message": "The display cannot download https:// URLs. Set an http:// local network URL for Home Assistant (Settings → System → Network)."
     }
   }
 }

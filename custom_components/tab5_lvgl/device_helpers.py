@@ -77,3 +77,7 @@ def state_topic(base_topic: str, leaf: str) -> str:
 
 def sensor_topic(base_topic: str, leaf: str) -> str:
     return f"{base_topic}/sensor/{leaf}"
+
+
+def telemetry_topic(base_topic: str, leaf: str) -> str:
+    return f"{base_topic}/tele/{leaf}"

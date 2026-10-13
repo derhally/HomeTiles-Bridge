@@ -64,6 +64,17 @@ TOPIC_DISPLAY_SLEEP = "display_sleep"
 TOPIC_SLEEP_MAINS = "sleep_mains"
 TOPIC_SLEEP_BATTERY = "sleep_battery"
 TOPIC_SENSOR_SOC = "soc_pct"
+# Panel diagnostics announced with the battery_voltage / runtime_diagnostics
+# capabilities.
+TOPIC_SENSOR_BATTERY_VOLTAGE = "battery_voltage"
+TOPIC_SENSOR_WIFI_RSSI = "wifi_rssi"
+TOPIC_SENSOR_FREE_INTERNAL = "free_internal_kib"
+TOPIC_SENSOR_FREE_PSRAM = "free_psram_kib"
+TOPIC_SENSOR_CHIP_TEMPERATURE = "chip_temperature"
+TOPIC_TELE_UPTIME = "uptime"
+TOPIC_STAT_RESET_REASON = "reset_reason"
+TOPIC_STAT_IP = "ip"
+TOPIC_STAT_FIRMWARE = "firmware_version"
 
 # Auto-sleep options: stable Home Assistant option keys (translated as
 # entity states) and the labels the panel sends and accepts on MQTT.

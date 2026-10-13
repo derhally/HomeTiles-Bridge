@@ -98,6 +98,7 @@ TOPIC_TELE_UPTIME = "uptime"
 TOPIC_STAT_RESET_REASON = "reset_reason"
 TOPIC_STAT_IP = "ip"
 TOPIC_STAT_FIRMWARE = "firmware_version"
+TOPIC_STAT_MAC = "mac"
 
 # Auto-sleep options: stable Home Assistant option keys (translated as
 # entity states) and the labels the panel sends and accepts on MQTT.

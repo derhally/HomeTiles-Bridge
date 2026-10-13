@@ -29,6 +29,15 @@ class SensorCapabilitiesTest(unittest.IsolatedAsyncioTestCase):
                  "DEFAULT_PREFIX": "ha/statestream", "normalise_topic": lambda value, fallback: value or fallback,
                  "merged_capabilities_data": CAPS.merged_capabilities_data, "supports": CAPS.supports,
                  "Tab5BatterySensor": lambda *args: "battery",
+                 "HomeTilesBatteryVoltageSensor": lambda *args: "battery_voltage",
+                 "HomeTilesWifiSignalSensor": lambda *args: "wifi_rssi",
+                 "HomeTilesLastRestartSensor": lambda *args: "last_restart",
+                 "HomeTilesResetReasonSensor": lambda *args: "reset_reason",
+                 "HomeTilesFreeMemorySensor": lambda entry, base, key, leaf: key,
+                 "HomeTilesChipTemperatureSensor": lambda *args: "chip_temperature",
+                 "HomeTilesTextDiagnosticSensor": lambda entry, base, key, leaf, icon: key,
+                 **{name: name for name in ("TOPIC_SENSOR_FREE_INTERNAL", "TOPIC_SENSOR_FREE_PSRAM",
+                                            "TOPIC_STAT_IP", "TOPIC_STAT_FIRMWARE")},
                  "Tab5ExternalTemperatureSensor": lambda *args: "legacy_temperature",
                  "HomeTilesLocalTemperatureSensor": lambda entry, base, descriptor: descriptor["id"],
                  "entry_local_io": lambda entry: entry.data.get("local_io", []),
@@ -47,6 +56,25 @@ class SensorCapabilitiesTest(unittest.IsolatedAsyncioTestCase):
             "capabilities": {"battery_soc": False, "legacy_external_temperature": False}}), [])
         self.assertEqual(await self.created({"model": "future_board", "local_io": [
             {"id": "probe", "type": "temperature"}], "capabilities": {"battery_soc": True}}), ["battery", "probe"])
+
+    async def test_panel_battery_voltage_and_runtime_diagnostics(self):
+        diagnostics = ["wifi_rssi", "last_restart", "reset_reason", "free_internal_memory",
+                       "free_psram", "chip_temperature", "ip_address", "firmware_version"]
+        self.assertEqual(await self.created({"model": "waveshare_touch_lcd_7b", "local_io": [],
+            "capabilities": {"battery_soc": True, "battery_voltage": True,
+                             "runtime_diagnostics": True}}),
+            ["battery", "battery_voltage", *diagnostics])
+        # Firmware that does not announce them (or older firmware) gets none.
+        self.assertEqual(await self.created({"model": "waveshare_touch_lcd_7b", "local_io": [],
+            "capabilities": {"battery_soc": False}}), [])
+        self.assertEqual(await self.created({"model": "waveshare_touch_lcd_7b", "local_io": []}), [])
+        self.assertEqual(CAPS.normalise_capabilities({"battery_voltage": True, "runtime_diagnostics": False}),
+                         {"battery_voltage": True, "runtime_diagnostics": False})
+        withdrawn = {"capabilities": {"battery_voltage": False, "runtime_diagnostics": False}}
+        announced = {"capabilities": {"battery_voltage": True, "runtime_diagnostics": True}}
+        for suffix in ["battery_voltage", *diagnostics]:
+            self.assertTrue(CAPS.stale_internal_sensor(f"panel_{suffix}", withdrawn), suffix)
+            self.assertFalse(CAPS.stale_internal_sensor(f"panel_{suffix}", announced), suffix)
 
     def test_explicit_capabilities_validate_and_override_stale_options(self):
         for value in [None, [], {"battery_soc": 1}, {"view_navigation": "true"}]:

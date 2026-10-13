@@ -312,6 +312,51 @@
       },
       "external_temperature": {
         "name": "Externe Temperatur"
+      },
+      "battery_voltage": {
+        "name": "Batteriespannung"
+      },
+      "wifi_rssi": {
+        "name": "WLAN-Signal"
+      },
+      "last_restart": {
+        "name": "Letzter Neustart"
+      },
+      "reset_reason": {
+        "name": "Neustartgrund",
+        "state": {
+          "power_on": "Einschalten",
+          "external": "Externer Reset",
+          "software": "Software-Neustart",
+          "panic": "Absturz",
+          "interrupt_watchdog": "Interrupt-Watchdog",
+          "task_watchdog": "Task-Watchdog",
+          "other_watchdog": "Anderer Watchdog",
+          "deep_sleep": "Aufwachen aus Tiefschlaf",
+          "brownout": "Unterspannung",
+          "sdio": "SDIO-Reset",
+          "usb": "USB-Reset",
+          "jtag": "JTAG-Reset",
+          "efuse": "eFuse-Fehler",
+          "power_glitch": "Spannungseinbruch",
+          "cpu_lockup": "CPU blockiert",
+          "unknown": "Unbekannt"
+        }
+      },
+      "free_internal_memory": {
+        "name": "Freier interner RAM"
+      },
+      "free_psram": {
+        "name": "Freier PSRAM"
+      },
+      "chip_temperature": {
+        "name": "Chiptemperatur"
+      },
+      "ip_address": {
+        "name": "IP-Adresse"
+      },
+      "firmware_version": {
+        "name": "Firmware-Version"
       }
     },
     "assist_satellite": {
@@ -322,11 +367,6 @@
     "button": {
       "assist": {
         "name": "Assist starten"
-      }
-    },
-    "media_player": {
-      "speaker": {
-        "name": "Lautsprecher"
       }
     }
   },

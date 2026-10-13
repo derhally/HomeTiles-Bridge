@@ -249,6 +249,51 @@
       },
       "external_temperature": {
         "name": "External Temperature"
+      },
+      "battery_voltage": {
+        "name": "Battery Voltage"
+      },
+      "wifi_rssi": {
+        "name": "Wi-Fi Signal"
+      },
+      "last_restart": {
+        "name": "Last Restart"
+      },
+      "reset_reason": {
+        "name": "Restart Reason",
+        "state": {
+          "power_on": "Power on",
+          "external": "External reset",
+          "software": "Software restart",
+          "panic": "Crash",
+          "interrupt_watchdog": "Interrupt watchdog",
+          "task_watchdog": "Task watchdog",
+          "other_watchdog": "Other watchdog",
+          "deep_sleep": "Wake from deep sleep",
+          "brownout": "Brownout",
+          "sdio": "SDIO reset",
+          "usb": "USB reset",
+          "jtag": "JTAG reset",
+          "efuse": "eFuse error",
+          "power_glitch": "Power glitch",
+          "cpu_lockup": "CPU lockup",
+          "unknown": "Unknown"
+        }
+      },
+      "free_internal_memory": {
+        "name": "Free Internal RAM"
+      },
+      "free_psram": {
+        "name": "Free PSRAM"
+      },
+      "chip_temperature": {
+        "name": "Chip Temperature"
+      },
+      "ip_address": {
+        "name": "IP Address"
+      },
+      "firmware_version": {
+        "name": "Firmware Version"
       }
     },
     "media_player": {
@@ -264,11 +309,6 @@
     "button": {
       "assist": {
         "name": "Assist"
-      }
-    },
-    "media_player": {
-      "speaker": {
-        "name": "Speaker"
       }
     }
   },
@@ -292,7 +332,7 @@
       "message": "The display can only play an absolute http:// URL."
     },
     "speaker_https_unsupported": {
-      "message": "The display cannot download https:// URLs. Set an http:// local network URL for Home Assistant (Settings \u2192 System \u2192 Network)."
+      "message": "The display cannot download https:// URLs. Set an http:// local network URL for Home Assistant (Settings → System → Network)."
     }
   }
 }

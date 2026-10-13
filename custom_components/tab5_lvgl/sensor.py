@@ -30,6 +30,7 @@ from .const import (
     TOPIC_SENSOR_WIFI_RSSI,
     TOPIC_STAT_FIRMWARE,
     TOPIC_STAT_IP,
+    TOPIC_STAT_MAC,
     TOPIC_STAT_RESET_REASON,
     TOPIC_TELE_UPTIME,
 )
@@ -78,6 +79,8 @@ async def async_setup_entry(
                                           TOPIC_STAT_IP, "mdi:ip-network"),
             HomeTilesTextDiagnosticSensor(entry, base_topic, "firmware_version",
                                           TOPIC_STAT_FIRMWARE, "mdi:chip"),
+            HomeTilesTextDiagnosticSensor(entry, base_topic, "mac_address",
+                                          TOPIC_STAT_MAC, "mdi:network-outline"),
         ))
     if supports(merged, "legacy_external_temperature"):
         # Legacy firmware exposed one fixed external sensor on the HA prefix.

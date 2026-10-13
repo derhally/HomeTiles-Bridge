@@ -12,8 +12,9 @@ def normalise_capabilities(value: Any) -> dict[str, bool]:
     if not isinstance(value, dict):
         raise ValueError("invalid_capabilities")
     result = {}
-    for key in ("audio_input", "audio_output", "battery_soc", "legacy_external_temperature", "local_camera",
-                "local_camera_stream", "view_navigation"):
+    for key in ("audio_input", "audio_output", "battery_soc", "battery_voltage",
+                "legacy_external_temperature", "local_camera", "local_camera_stream",
+                "runtime_diagnostics", "view_navigation"):
         if key in value:
             if type(value[key]) is not bool:
                 raise ValueError("invalid_capabilities")
@@ -34,7 +35,7 @@ def supports(data: Mapping[str, Any], capability: str) -> bool:
     if capability in explicit:
         return explicit[capability] is True
     if capability in ("view_navigation", "local_camera", "local_camera_stream", "audio_output",
-                      "audio_input"):
+                      "audio_input", "battery_voltage", "runtime_diagnostics"):
         # Never inferred: only firmware that announces it can answer requests.
         return False
     # No fixed external channel exists once firmware announces local I/O,
@@ -50,8 +51,17 @@ def supports(data: Mapping[str, Any], capability: str) -> bool:
     return False
 
 
+# Panel diagnostic sensors (unique-id suffixes) created by runtime_diagnostics.
+RUNTIME_DIAGNOSTIC_SENSORS = ("_wifi_rssi", "_last_restart", "_reset_reason",
+                              "_free_internal_memory", "_free_psram",
+                              "_chip_temperature", "_ip_address", "_firmware_version")
+
+
 def stale_internal_sensor(unique_id: str, data: Mapping[str, Any]) -> bool:
     return ((unique_id.endswith("_battery_soc") and not supports(data, "battery_soc"))
+            or (unique_id.endswith("_battery_voltage") and not supports(data, "battery_voltage"))
+            or (unique_id.endswith(RUNTIME_DIAGNOSTIC_SENSORS)
+                and not supports(data, "runtime_diagnostics"))
             or (unique_id.endswith("_external_temperature")
                 and not supports(data, "legacy_external_temperature")))
 

@@ -361,6 +361,9 @@
       },
       "firmware_version": {
         "name": "Firmware-Version"
+      },
+      "mac_address": {
+        "name": "MAC-Adresse"
       }
     },
     "assist_satellite": {

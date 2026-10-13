@@ -55,7 +55,8 @@ def supports(data: Mapping[str, Any], capability: str) -> bool:
 # Panel diagnostic sensors (unique-id suffixes) created by runtime_diagnostics.
 RUNTIME_DIAGNOSTIC_SENSORS = ("_wifi_rssi", "_last_restart", "_reset_reason",
                               "_free_internal_memory", "_free_psram",
-                              "_chip_temperature", "_ip_address", "_firmware_version")
+                              "_chip_temperature", "_ip_address", "_firmware_version",
+                              "_mac_address")
 
 
 def stale_internal_sensor(unique_id: str, data: Mapping[str, Any]) -> bool:

@@ -37,7 +37,8 @@ class SensorCapabilitiesTest(unittest.IsolatedAsyncioTestCase):
                  "HomeTilesChipTemperatureSensor": lambda *args: "chip_temperature",
                  "HomeTilesTextDiagnosticSensor": lambda entry, base, key, leaf, icon: key,
                  **{name: name for name in ("TOPIC_SENSOR_FREE_INTERNAL", "TOPIC_SENSOR_FREE_PSRAM",
-                                            "TOPIC_STAT_IP", "TOPIC_STAT_FIRMWARE")},
+                                            "TOPIC_STAT_IP", "TOPIC_STAT_FIRMWARE",
+                                            "TOPIC_STAT_MAC")},
                  "Tab5ExternalTemperatureSensor": lambda *args: "legacy_temperature",
                  "HomeTilesLocalTemperatureSensor": lambda entry, base, descriptor: descriptor["id"],
                  "entry_local_io": lambda entry: entry.data.get("local_io", []),
@@ -59,7 +60,8 @@ class SensorCapabilitiesTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_panel_battery_voltage_and_runtime_diagnostics(self):
         diagnostics = ["wifi_rssi", "last_restart", "reset_reason", "free_internal_memory",
-                       "free_psram", "chip_temperature", "ip_address", "firmware_version"]
+                       "free_psram", "chip_temperature", "ip_address", "firmware_version",
+                       "mac_address"]
         self.assertEqual(await self.created({"model": "waveshare_touch_lcd_7b", "local_io": [],
             "capabilities": {"battery_soc": True, "battery_voltage": True,
                              "runtime_diagnostics": True}}),

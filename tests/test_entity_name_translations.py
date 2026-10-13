@@ -36,6 +36,7 @@ EXPECTED = {
     ("sensor", "chip_temperature"): ("Chip Temperature", "Chiptemperatur"),
     ("sensor", "ip_address"): ("IP Address", "IP-Adresse"),
     ("sensor", "firmware_version"): ("Firmware Version", "Firmware-Version"),
+    ("sensor", "mac_address"): ("MAC Address", "MAC-Adresse"),
 }
 
 

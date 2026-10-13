@@ -27,6 +27,15 @@ EXPECTED = {
     ("button", "assist"): ("Start Assist", "Assist starten"),
     ("sensor", "battery_soc"): ("Battery SoC", "Batterie SoC"),
     ("sensor", "external_temperature"): ("External Temperature", "Externe Temperatur"),
+    ("sensor", "battery_voltage"): ("Battery Voltage", "Batteriespannung"),
+    ("sensor", "wifi_rssi"): ("Wi-Fi Signal", "WLAN-Signal"),
+    ("sensor", "last_restart"): ("Last Restart", "Letzter Neustart"),
+    ("sensor", "reset_reason"): ("Restart Reason", "Neustartgrund"),
+    ("sensor", "free_internal_memory"): ("Free Internal RAM", "Freier interner RAM"),
+    ("sensor", "free_psram"): ("Free PSRAM", "Freier PSRAM"),
+    ("sensor", "chip_temperature"): ("Chip Temperature", "Chiptemperatur"),
+    ("sensor", "ip_address"): ("IP Address", "IP-Adresse"),
+    ("sensor", "firmware_version"): ("Firmware Version", "Firmware-Version"),
 }
 
 
@@ -55,6 +64,22 @@ class EntityNameTranslationTests(unittest.TestCase):
             for key in keys:
                 self.assertIn(key, en.get(platform, {}), f"{platform}.{key} en")
                 self.assertIn(key, de.get(platform, {}), f"{platform}.{key} de")
+
+    def test_panel_diagnostic_keys_and_reset_reasons_are_translated(self):
+        en = _load("translations/en.json")
+        de = _load("translations/de.json")
+        text = (ROOT / "sensor.py").read_text(encoding="utf-8")
+        # Diagnostic sensors pass their translation key to the shared base class.
+        keys = set(re.findall(r'super\(\).__init__\(entry, base_topic, "([a-z_]+)"', text))
+        keys.update(re.findall(r'Sensor\(entry, base_topic, "([a-z_]+)"', text))
+        self.assertGreaterEqual(len(keys), 9)
+        for key in keys:
+            self.assertIn(key, en["sensor"], key)
+            self.assertIn(key, de["sensor"], key)
+        reasons = re.search(r"RESET_REASONS = \[(.*?)\]", text, re.S).group(1)
+        for reason in re.findall(r'"([a-z_]+)"', reasons):
+            self.assertIn(reason, en["sensor"]["reset_reason"]["state"], reason)
+            self.assertIn(reason, de["sensor"]["reset_reason"]["state"], reason)
 
     def test_no_hardcoded_german_names(self):
         for platform in PLATFORMS:

@@ -265,6 +265,15 @@
           "aggressive": "Aggressive",
           "relaxed": "Relaxed"
         }
+      },
+      "assist_screen_style": {
+        "name": "Assist screen",
+        "state": {
+          "atom": "Atom",
+          "reactor": "Reactor",
+          "dot_halo": "Dot Halo",
+          "voice_pills": "Voice Pills"
+        }
       }
     },
     "switch": {
@@ -369,6 +378,11 @@
     "button": {
       "assist": {
         "name": "Start Assist"
+      }
+    },
+    "media_player": {
+      "speaker": {
+        "name": "Speaker"
       }
     }
   },

@@ -53,6 +53,7 @@ from .assist import (
     build_start_command,
     build_stop_command,
     build_mic_command,
+    build_screen_style_command,
     build_wake_words_command,
     new_session_id,
     parse_audio_frame,
@@ -336,6 +337,18 @@ class HomeTilesAssistSatellite(AssistSatelliteEntity):
             sent = await self._async_send_assist(build_wake_words_command(words, listen))
         except Exception:  # noqa: BLE001 - reported as not connected below
             _LOGGER.debug("HomeTiles Assist wake words for %s failed", self._base,
+                          exc_info=True)
+            sent = False
+        if not sent:
+            raise HomeAssistantError(translation_domain=DOMAIN,
+                                     translation_key="assist_not_connected")
+
+    async def async_set_screen_style(self, style: str) -> None:
+        """Pick the look of the panel's Assist screen (sealed when paired)."""
+        try:
+            sent = await self._async_send_assist(build_screen_style_command(style))
+        except Exception:  # noqa: BLE001 - reported as not connected below
+            _LOGGER.debug("HomeTiles Assist screen style for %s failed", self._base,
                           exc_info=True)
             sent = False
         if not sent:

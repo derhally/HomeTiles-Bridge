@@ -89,14 +89,16 @@ class AssistContractTest(unittest.TestCase):
                          {"state": "listening", "id": ID, "error": None,
                           "wake_words": None, "active_wake_words": None,
                           "chosen_wake_words": None, "wake_listen": None,
-                          "mic_enabled": None})
+                          "mic_enabled": None,
+                          "screen_style": None, "screen_styles": None})
         self.assertEqual(
             ASSIST.parse_status(json.dumps({"v": 1, "state": "idle", "id": ID,
                                             "error": "timeout"}).encode()),
             {"state": "idle", "id": ID, "error": "timeout",
              "wake_words": None, "active_wake_words": None,
              "chosen_wake_words": None, "wake_listen": None,
-             "mic_enabled": None})
+             "mic_enabled": None,
+             "screen_style": None, "screen_styles": None})
         self.assertEqual(ASSIST.parse_status(json.dumps({"v": 1, "state": "idle",
                                                          "error": "new_code"}))["error"],
                          "unknown")
@@ -311,6 +313,7 @@ class AssistSelectsTest(unittest.IsolatedAsyncioTestCase):
             "Tab5SleepSelect": lambda *args: "sleep",
             "HomeTilesViewSelect": lambda *args: "view",
             "HomeTilesWakeWordSelect": lambda *args: "wake_word",
+            "HomeTilesScreenStyleSelect": lambda *args: "screen_style",
             "TOPIC_SLEEP_MAINS": "sleep_mains",
         }
         tree = ast.parse((ROOT / "select.py").read_text(encoding="utf-8"))
@@ -339,12 +342,12 @@ class AssistSelectsTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_no_selects_without_assist_pipeline(self):
         _, created, _, _ = await self.created({"audio_input": True}, components=())
-        self.assertEqual(created, ["sleep", "wake_word"])
+        self.assertEqual(created, ["sleep", "wake_word", "screen_style"])
 
     async def test_selects_join_the_panel_device(self):
         hass, created, PipelineSelect, VadSelect = await self.created({"audio_input": True})
-        self.assertEqual(created[1], "wake_word")
-        pipeline, vad = created[2:]
+        self.assertEqual(created[1:3], ["wake_word", "screen_style"])
+        pipeline, vad = created[3:]
         self.assertIsInstance(pipeline, PipelineSelect)
         self.assertEqual(pipeline.args, (hass, "tab5_lvgl", "mac_assist"))
         self.assertIsInstance(vad, VadSelect)
@@ -441,6 +444,97 @@ class WakeWordSelectTest(unittest.IsolatedAsyncioTestCase):
         select.hass = types.SimpleNamespace(data={})
         with self.assertRaises(FakeHomeAssistantError):
             await select.async_select_option("okay_nabu")
+
+
+class ScreenStyleTest(unittest.IsolatedAsyncioTestCase):
+    """The Assist screen style: status fields, command and select."""
+
+    STYLES = ["atom", "reactor", "dot_halo", "voice_pills"]
+
+    def status(self, **fields):
+        payload = {"v": 1, "state": "idle", "screen_style": "reactor",
+                   "screen_styles": self.STYLES}
+        payload.update(fields)
+        return json.dumps(payload)
+
+    def test_status_fields(self):
+        status = ASSIST.parse_status(self.status())
+        self.assertEqual((status["screen_style"], status["screen_styles"]),
+                         ("reactor", self.STYLES))
+        # A style outside the reported catalog, or no catalog, reads as unknown.
+        self.assertIsNone(ASSIST.parse_status(self.status(screen_style="sphere"))["screen_style"])
+        status = ASSIST.parse_status(self.status(screen_styles="atom"))
+        self.assertEqual((status["screen_style"], status["screen_styles"]), (None, None))
+        self.assertEqual(ASSIST.parse_status(self.status(
+            screen_styles=["atom", "Bad Id", 3, "atom"]))["screen_styles"], ["atom"])
+
+    def test_command(self):
+        self.assertEqual(json.loads(ASSIST.build_screen_style_command("dot_halo")),
+                         {"v": 1, "op": "screen_style", "style": "dot_halo"})
+        for bad in ("", "Dot Halo", None, 3, "x" * 33):
+            with self.assertRaises(ValueError):
+                ASSIST.build_screen_style_command(bad)
+
+    def make(self):
+        class Entity:
+            async def async_added_to_hass(self):
+                pass
+
+        class Category:
+            CONFIG = "config"
+
+        written = []
+        scope = {"SelectEntity": Entity, "EntityCategory": Category,
+                 "HomeAssistantError": FakeHomeAssistantError, "DOMAIN": "tab5_lvgl",
+                 "ASSIST_SATELLITES_KEY": ASSIST.ASSIST_SATELLITES_KEY,
+                 "assist_status_topic": ASSIST.assist_status_topic,
+                 "assist_screen_style_select_unique_id":
+                     ASSIST.assist_screen_style_select_unique_id,
+                 "parse_status": ASSIST.parse_status,
+                 "entry_device_info": lambda entry: {}, "entry_device_id": lambda entry: "mac",
+                 "ConfigEntry": object}
+        tree = ast.parse((ROOT / "select.py").read_text(encoding="utf-8"))
+        body = [node for node in tree.body
+                if getattr(node, "name", None) == "HomeTilesScreenStyleSelect"]
+        exec(compile(ast.fix_missing_locations(ast.Module(body=body, type_ignores=[])),
+                     "select.py", "exec"), scope)
+        select = scope["HomeTilesScreenStyleSelect"](types.SimpleNamespace(entry_id="e1"), BASE)
+        select.async_write_ha_state = lambda: written.append(select.current_option)
+        return select, written
+
+    def test_select_mirrors_the_panel(self):
+        select, _ = self.make()
+        self.assertEqual(select._attr_unique_id, "mac_assist_screen_style")
+        self.assertFalse(select.available)
+        self.assertIsNone(select.current_option)
+        self.assertTrue(select.apply_status(self.status()))
+        self.assertTrue(select.available)
+        self.assertEqual((select.options, select.current_option), (self.STYLES, "reactor"))
+        # Older firmware reports no styles: the select is unavailable.
+        self.assertTrue(select.apply_status(json.dumps({"v": 1, "state": "idle"})))
+        self.assertFalse(select.available)
+        self.assertFalse(select.apply_status("not json"))
+        self.assertTrue(select.apply_status(""))
+        self.assertFalse(select.available)
+
+    async def test_select_sends_through_the_satellite(self):
+        select, written = self.make()
+        select.apply_status(self.status())
+        sent = []
+
+        class Satellite:
+            async def async_set_screen_style(self, style):
+                sent.append(style)
+
+        select.hass = types.SimpleNamespace(data={"tab5_lvgl": {
+            ASSIST.ASSIST_SATELLITES_KEY: {"e1": Satellite()}}})
+        await select.async_select_option("voice_pills")
+        self.assertEqual((sent, written), (["voice_pills"], ["voice_pills"]))
+        with self.assertRaises(FakeHomeAssistantError):
+            await select.async_select_option("sphere")
+        select.hass = types.SimpleNamespace(data={})
+        with self.assertRaises(FakeHomeAssistantError):
+            await select.async_select_option("atom")
 
 
 class PublishHelperTest(unittest.IsolatedAsyncioTestCase):

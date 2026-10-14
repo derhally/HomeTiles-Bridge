@@ -218,11 +218,48 @@
           "60min": "60 min",
           "never": "Nunca"
         }
+      },
+      "pipeline": {
+        "name": "Assistente",
+        "state": {
+          "preferred": "Preferido"
+        }
+      },
+      "vad_sensitivity": {
+        "name": "Detecção de fim da fala",
+        "state": {
+          "default": "Padrão",
+          "aggressive": "Agressiva",
+          "relaxed": "Relaxada"
+        }
+      },
+      "wake_word": {
+        "name": "Palavra de ativação",
+        "state": {
+          "off": "Desligada",
+          "okay_nabu": "Okay Nabu",
+          "hey_jarvis": "Hey Jarvis",
+          "hey_mycroft": "Hey Mycroft",
+          "alexa": "Alexa",
+          "hey_home_assistant": "Hey Home Assistant"
+        }
+      },
+      "assist_screen_style": {
+        "name": "Tela do Assist",
+        "state": {
+          "atom": "Átomo",
+          "reactor": "Reator",
+          "dot_halo": "Halo de pontos",
+          "voice_pills": "Pílulas de voz"
+        }
       }
     },
     "switch": {
       "local_camera": {
         "name": "Câmera"
+      },
+      "microphone": {
+        "name": "Microfone"
       }
     },
     "binary_sensor": {
@@ -252,6 +289,69 @@
       },
       "external_temperature": {
         "name": "Temperatura externa"
+      },
+      "battery_voltage": {
+        "name": "Tensão da bateria"
+      },
+      "wifi_rssi": {
+        "name": "Sinal Wi-Fi"
+      },
+      "last_restart": {
+        "name": "Última reinicialização"
+      },
+      "reset_reason": {
+        "name": "Motivo da reinicialização",
+        "state": {
+          "power_on": "Ligado",
+          "external": "Reset externo",
+          "software": "Reinicialização por software",
+          "panic": "Falha",
+          "interrupt_watchdog": "Watchdog de interrupção",
+          "task_watchdog": "Watchdog de tarefa",
+          "other_watchdog": "Outro watchdog",
+          "deep_sleep": "Despertar do sono profundo",
+          "brownout": "Queda de tensão",
+          "sdio": "Reset SDIO",
+          "usb": "Reset USB",
+          "jtag": "Reset JTAG",
+          "efuse": "Erro de eFuse",
+          "power_glitch": "Falha de alimentação",
+          "cpu_lockup": "Travamento da CPU",
+          "unknown": "Desconhecido"
+        }
+      },
+      "free_internal_memory": {
+        "name": "RAM interna livre"
+      },
+      "free_psram": {
+        "name": "PSRAM livre"
+      },
+      "chip_temperature": {
+        "name": "Temperatura do chip"
+      },
+      "ip_address": {
+        "name": "Endereço IP"
+      },
+      "firmware_version": {
+        "name": "Versão do firmware"
+      },
+      "mac_address": {
+        "name": "Endereço MAC"
+      }
+    },
+    "assist_satellite": {
+      "assist": {
+        "name": "Assist"
+      }
+    },
+    "button": {
+      "assist": {
+        "name": "Assist"
+      }
+    },
+    "media_player": {
+      "speaker": {
+        "name": "Alto-falante"
       }
     }
   },
@@ -261,6 +361,30 @@
     },
     "invalid_view": {
       "message": "A visualização selecionada não existe mais."
+    },
+    "microphone_needs_pairing": {
+      "message": "Ligue o microfone na tela (Configurações > Áudio) ou criptografe a conexão primeiro: o Home Assistant só pode ligá-lo pela conexão criptografada."
+    },
+    "assist_unavailable": {
+      "message": "O microfone da tela não está disponível: a tela está offline ou não o anunciou."
+    },
+    "assist_not_connected": {
+      "message": "O microfone da tela não pode ser alcançado: a conexão criptografada ainda não está pronta."
+    },
+    "announcement_not_sent": {
+      "message": "O anúncio não chega à tela: a tela está offline ou a conexão criptografada ainda não está pronta."
+    },
+    "announcement_not_played": {
+      "message": "A tela não conseguiu reproduzir o anúncio ({error})."
+    },
+    "speaker_not_connected": {
+      "message": "O alto-falante da tela não pode ser alcançado: a conexão criptografada ainda não está pronta."
+    },
+    "speaker_invalid_url": {
+      "message": "A tela só pode reproduzir uma URL http:// absoluta."
+    },
+    "speaker_https_unsupported": {
+      "message": "A tela não consegue baixar URLs https://. Defina uma URL http:// da rede local para o Home Assistant (Configurações → Sistema → Rede)."
     }
   }
 }

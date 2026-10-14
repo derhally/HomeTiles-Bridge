@@ -243,6 +243,15 @@
           "alexa": "Alexa",
           "hey_home_assistant": "Hey Home Assistant"
         }
+      },
+      "assist_screen_style": {
+        "name": "Assist screen",
+        "state": {
+          "atom": "Atom",
+          "reactor": "Reactor",
+          "dot_halo": "Dot Halo",
+          "voice_pills": "Voice Pills"
+        }
       }
     },
     "switch": {
@@ -338,6 +347,11 @@
     "button": {
       "assist": {
         "name": "Assist"
+      }
+    },
+    "media_player": {
+      "speaker": {
+        "name": "Speaker"
       }
     }
   },

@@ -282,8 +282,10 @@ class AssistContractTest(unittest.TestCase):
             self.assertEqual(set(selects["vad_sensitivity"]["state"]),
                              {"default", "aggressive", "relaxed"}, name)
             self.assertIn("name", data["entity"]["switch"]["microphone"], name)
-            for key in ("assist_unavailable", "assist_not_connected", "microphone_needs_pairing"):
+            for key in ("assist_unavailable", "assist_not_connected", "microphone_needs_pairing",
+                        "announcement_not_sent", "announcement_not_played"):
                 self.assertIn("message", data["exceptions"][key], name)
+            self.assertIn("{error}", data["exceptions"]["announcement_not_played"]["message"], name)
 
 
 class AssistSelectsTest(unittest.IsolatedAsyncioTestCase):
@@ -661,6 +663,21 @@ class WakeWord:
     trained_languages: list
 
 
+@dataclass(frozen=True)
+class Announcement:
+    message: str
+    media_id: str
+    original_media_id: str = ""
+    tts_token: str | None = None
+    media_id_source: str = "tts"
+    preannounce_media_id: str | None = None
+
+
+class SatelliteFeature(enum.IntFlag):
+    ANNOUNCE = 1
+    START_CONVERSATION = 2
+
+
 @dataclass
 class Configuration:
     available_wake_words: list
@@ -709,10 +726,12 @@ class FakeButtonEntity:
 
 
 class FakeHomeAssistantError(Exception):
-    def __init__(self, *args, translation_domain=None, translation_key=None, **kwargs):
+    def __init__(self, *args, translation_domain=None, translation_key=None,
+                 translation_placeholders=None, **kwargs):
         super().__init__(*args)
         self.translation_domain = translation_domain
         self.translation_key = translation_key
+        self.translation_placeholders = translation_placeholders
 
 
 def fake_process_url(hass, media_id):
@@ -736,6 +755,8 @@ def load_platforms(fake_mqtt):
     satellite.AssistSatelliteEntity = FakeSatelliteEntity
     satellite.AssistSatelliteConfiguration = Configuration
     satellite.AssistSatelliteWakeWord = WakeWord
+    satellite.AssistSatelliteAnnouncement = Announcement
+    satellite.AssistSatelliteEntityFeature = SatelliteFeature
     button = types.ModuleType("homeassistant.components.button")
     button.ButtonEntity = FakeButtonEntity
     media_player = types.ModuleType("homeassistant.components.media_player")
@@ -886,7 +907,8 @@ class AssistSatellitePlatformTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(satellite._attr_translation_key, "assist")
         self.assertTrue(satellite._attr_has_entity_name)
         self.assertEqual(satellite.tts_options, {"preferred_format": "mp3"})
-        self.assertFalse(hasattr(satellite, "_attr_supported_features"))
+        self.assertEqual(satellite._attr_supported_features,
+                         SatelliteFeature.ANNOUNCE | SatelliteFeature.START_CONVERSATION)
         [button] = await self.created(self.button_module, entry({"audio_input": True}))
         self.assertEqual(button._attr_unique_id, "mac_assist")
         self.assertEqual(button._attr_translation_key, "assist")
@@ -1248,6 +1270,188 @@ class AssistSatellitePlatformTest(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(satellite.available)
         await self.deliver(f"{BASE}/stat/assist", json.dumps({"v": 1, "state": "idle"}))
         self.assertTrue(satellite.available)
+
+    # Announcements -----------------------------------------------------------
+
+    CHIME = "http://192.168.1.2:8123/api/assist_satellite/static/preannounce.mp3?authSig=x"
+    MESSAGE = "http://192.168.1.2:8123/api/tts_proxy/ann.mp3?authSig=x"
+
+    async def speaker_status(self, request_id, state="idle", error=None):
+        payload = {"v": 1, "state": state, "volume": 0.5, "id": request_id}
+        if error is not None:
+            payload["error"] = error
+        await self.deliver(f"{BASE}/stat/audio", json.dumps(payload))
+
+    async def next_play(self, count):
+        """Waits until the count-th play command went out and returns it."""
+        for _ in range(50):
+            plays = [c for c in self.audio_commands() if c["op"] == "play"]
+            if len(plays) >= count:
+                return plays[count - 1]
+            await asyncio.sleep(0)
+        self.fail(f"play command {count} was not sent")
+
+    async def test_announce_plays_chime_then_message_and_waits(self):
+        satellite = await self.start()
+        task = asyncio.ensure_future(satellite.async_announce(
+            Announcement(message="Dinner", media_id=self.MESSAGE,
+                         preannounce_media_id=self.CHIME)))
+        chime = await self.next_play(1)
+        self.assertEqual(chime["url"], self.CHIME)
+        # The message waits for the chime; an older clip's idle changes nothing.
+        await self.speaker_status("a" * 16)
+        await self.speaker_status(chime["id"], "playing")
+        await settle()
+        self.assertEqual(len(self.audio_commands()), 1)
+        await self.speaker_status(chime["id"])
+        message = await self.next_play(2)
+        self.assertEqual(message["url"], self.MESSAGE)
+        self.assertNotEqual(message["id"], chime["id"])
+        self.assertFalse(task.done())
+        await self.speaker_status(message["id"], "playing")
+        await self.speaker_status(message["id"])
+        await asyncio.wait_for(task, 1)
+        self.assertEqual(satellite._play_waiters, {})
+        # Announcements never touch the microphone or the Assist answer state.
+        self.assertEqual(self.assist_commands(), [])
+        self.assertEqual(satellite.tts_finished, 0)
+
+    async def test_announce_without_chime_plays_only_the_message(self):
+        satellite = await self.start()
+        task = asyncio.ensure_future(satellite.async_announce(
+            Announcement(message="", media_id=self.MESSAGE)))
+        play = await self.next_play(1)
+        self.assertEqual(play["url"], self.MESSAGE)
+        await self.speaker_status(play["id"])
+        await asyncio.wait_for(task, 1)
+        self.assertEqual(len(self.audio_commands()), 1)
+
+    async def test_announce_reports_a_playback_error(self):
+        satellite = await self.start()
+        task = asyncio.ensure_future(satellite.async_announce(
+            Announcement(message="x", media_id=self.MESSAGE, preannounce_media_id=self.CHIME)))
+        chime = await self.next_play(1)
+        await self.speaker_status(chime["id"], error="download_failed")
+        with self.assertRaises(FakeHomeAssistantError) as raised:
+            await asyncio.wait_for(task, 1)
+        self.assertEqual(raised.exception.translation_key, "announcement_not_played")
+        self.assertEqual(raised.exception.translation_placeholders, {"error": "download_failed"})
+        # The message is not played after a failed chime.
+        self.assertEqual(len(self.audio_commands()), 1)
+        self.assertEqual(satellite._play_waiters, {})
+
+    async def test_announce_refused_while_another_clip_plays(self):
+        satellite = await self.start()
+        task = asyncio.ensure_future(satellite.async_announce(
+            Announcement(message="x", media_id=self.MESSAGE)))
+        play = await self.next_play(1)
+        # The panel answers a refused play with its id and error, still "playing".
+        await self.speaker_status(play["id"], "playing", error="invalid_url")
+        with self.assertRaises(FakeHomeAssistantError) as raised:
+            await asyncio.wait_for(task, 1)
+        self.assertEqual(raised.exception.translation_placeholders, {"error": "invalid_url"})
+
+    async def test_announce_ends_when_a_newer_clip_takes_over(self):
+        satellite = await self.start()
+        task = asyncio.ensure_future(satellite.async_announce(
+            Announcement(message="x", media_id=self.MESSAGE)))
+        play = await self.next_play(1)
+        # Statuses of older clips before it started do not end it.
+        await self.speaker_status("a" * 16, "playing")
+        await settle()
+        self.assertFalse(task.done())
+        await self.speaker_status(play["id"], "playing")
+        # A newer play replaces the id without an idle for this one.
+        await self.speaker_status("b" * 16, "playing")
+        await asyncio.wait_for(task, 1)
+
+    async def test_announce_ends_when_the_panel_goes_offline(self):
+        satellite = await self.start()
+        task = asyncio.ensure_future(satellite.async_announce(
+            Announcement(message="x", media_id=self.MESSAGE)))
+        await self.next_play(1)
+        await self.deliver(f"{BASE}/stat/connected", "0")
+        with self.assertRaises(FakeHomeAssistantError) as raised:
+            await asyncio.wait_for(task, 1)
+        self.assertEqual(raised.exception.translation_placeholders, {"error": "offline"})
+        with self.assertRaises(FakeHomeAssistantError) as raised:
+            await satellite.async_announce(Announcement(message="x", media_id=self.MESSAGE))
+        self.assertEqual(raised.exception.translation_key, "assist_unavailable")
+
+    async def test_announce_times_out_without_a_status(self):
+        satellite = await self.start()
+        with mock.patch.object(self.satellite_module, "ANNOUNCE_FINISH_TIMEOUT_S", 0.01):
+            await asyncio.wait_for(satellite.async_announce(
+                Announcement(message="x", media_id=self.MESSAGE)), 1)
+        self.assertEqual(satellite._play_waiters, {})
+
+    async def test_announce_refuses_urls_the_panel_cannot_fetch(self):
+        satellite = await self.start()
+        with self.assertRaises(FakeHomeAssistantError) as raised:
+            await satellite.async_announce(Announcement(message="x", media_id="/relative.mp3"))
+        self.assertEqual(raised.exception.translation_key, "announcement_not_played")
+        self.assertEqual(self.audio_commands(), [])
+
+    async def test_announce_paired_uses_the_sealed_channel(self):
+        bridge = SealingBridge()
+        satellite = await self.start(bridge=bridge)
+        satellite._paired = True
+        task = asyncio.ensure_future(satellite.async_announce(
+            Announcement(message="x", media_id=self.MESSAGE)))
+        for _ in range(50):
+            if bridge.audio:
+                break
+            await asyncio.sleep(0)
+        [play] = bridge.audio
+        self.assertEqual(play["url"], self.MESSAGE)
+        await self.speaker_status(play["id"])
+        await asyncio.wait_for(task, 1)
+        self.assertEqual(self.mqtt.published, [])
+
+    async def test_announce_paired_without_bridge_never_sends_plaintext(self):
+        satellite = await self.start()
+        satellite._paired = True
+        with self.assertRaises(FakeHomeAssistantError) as raised:
+            await satellite.async_announce(Announcement(message="x", media_id=self.MESSAGE))
+        self.assertEqual(raised.exception.translation_key, "announcement_not_sent")
+        self.assertEqual(self.mqtt.published, [])
+        self.assertEqual(satellite._play_waiters, {})
+
+    async def test_start_conversation_announces_then_listens(self):
+        satellite = await self.start()
+        task = asyncio.ensure_future(satellite.async_start_conversation(
+            Announcement(message="Close the garage?", media_id=self.MESSAGE)))
+        play = await self.next_play(1)
+        await settle()
+        # Listening starts only after the question finished playing.
+        self.assertEqual(self.assist_commands(), [])
+        await self.speaker_status(play["id"])
+        await asyncio.wait_for(task, 1)
+        [start] = self.assist_commands()
+        self.assertEqual(start["op"], "start")
+        await self.send_frames(start["id"], 2)
+        await asyncio.wait_for(self.pipeline_done.wait(), 1)
+        self.assertEqual(satellite.stages, (Stage.STT, Stage.TTS))
+        self.assertIsNone(satellite.wake_word_phrase)
+
+    async def test_start_conversation_does_not_listen_after_a_failed_question(self):
+        satellite = await self.start()
+        task = asyncio.ensure_future(satellite.async_start_conversation(
+            Announcement(message="x", media_id=self.MESSAGE)))
+        play = await self.next_play(1)
+        await self.speaker_status(play["id"], error="unsupported_format")
+        with self.assertRaises(FakeHomeAssistantError):
+            await asyncio.wait_for(task, 1)
+        self.assertEqual(self.assist_commands(), [])
+
+    async def test_removal_releases_waiting_announcements(self):
+        satellite = await self.start()
+        task = asyncio.ensure_future(satellite.async_announce(
+            Announcement(message="x", media_id=self.MESSAGE)))
+        await self.next_play(1)
+        await satellite.async_will_remove_from_hass()
+        with self.assertRaises(FakeHomeAssistantError):
+            await asyncio.wait_for(task, 1)
 
     async def test_removal_stops_the_microphone(self):
         blocked = asyncio.Event()

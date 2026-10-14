@@ -13,6 +13,12 @@ Wake word: the panel detects microWakeWord models itself and reports them on
 press and passes the word's phrase to the pipeline. The words come from the
 panel's retained status; Home Assistant's wake word settings send the
 ``wake_words`` command.
+
+Announcements: ``assist_satellite.announce`` plays the optional chime and
+then the message on the panel's speaker with the same play command, one
+after the other, and returns once the panel reports each finished.
+``start_conversation`` and ``ask_question`` announce first and then start a
+run without a wake word, like a button press.
 """
 
 from __future__ import annotations
@@ -28,8 +34,10 @@ from homeassistant.components.assist_pipeline import (
     PipelineStage,
 )
 from homeassistant.components.assist_satellite import (
+    AssistSatelliteAnnouncement,
     AssistSatelliteConfiguration,
     AssistSatelliteEntity,
+    AssistSatelliteEntityFeature,
     AssistSatelliteWakeWord,
 )
 from homeassistant.components.media_player import async_process_play_media_url
@@ -76,6 +84,9 @@ _WARNING_INTERVAL_S = 300.0
 # The satellite returns to idle when the speaker never reports the answer
 # finished (lost status, panel restart).
 TTS_FINISH_TIMEOUT_S = 120.0
+# An announcement returns at the latest after this long per played file, so
+# a lost status never blocks the automation that announced.
+ANNOUNCE_FINISH_TIMEOUT_S = 300.0
 # Home Assistant converts the answer for the panel's decoder (mp3 or wav).
 _TTS_OPTIONS = {"preferred_format": "mp3"}
 
@@ -96,6 +107,34 @@ async def async_setup_entry(
         async_add_entities([HomeTilesAssistSatellite(entry, entry_base_topic(entry))])
 
 
+class _PlayWaiter:
+    """One announcement file on the panel speaker, until it ended.
+
+    The panel reports the end as an idle status with the file's id. A newer
+    play (an Assist answer, the media player) takes over the status id
+    without an idle in between, so once the file started, a status for
+    another id also ends it.
+    """
+
+    def __init__(self, future: asyncio.Future) -> None:
+        self.future = future
+        self.started = False
+
+    def update(self, request_id: str, status: dict) -> None:
+        if status["id"] == request_id:
+            self.started = True
+            # A refused play reports its error without leaving "playing"
+            # when something else is still playing.
+            if status["state"] == "idle" or status["error"] is not None:
+                self.finish(status["error"])
+        elif self.started:
+            self.finish(None)
+
+    def finish(self, error: str | None) -> None:
+        if not self.future.done():
+            self.future.set_result(error)
+
+
 def assist_satellite_for_entry(hass: HomeAssistant, entry_id: str):
     data = getattr(hass, "data", None)
     domain = data.get(DOMAIN, {}) if isinstance(data, dict) else {}
@@ -109,6 +148,8 @@ class HomeTilesAssistSatellite(AssistSatelliteEntity):
     _attr_translation_key = "assist"
     _attr_should_poll = False
     _attr_tts_options = _TTS_OPTIONS
+    _attr_supported_features = (AssistSatelliteEntityFeature.ANNOUNCE
+                                | AssistSatelliteEntityFeature.START_CONVERSATION)
 
     def __init__(self, entry: ConfigEntry, base_topic: str) -> None:
         self._entry_id = entry.entry_id
@@ -126,6 +167,8 @@ class HomeTilesAssistSatellite(AssistSatelliteEntity):
         self._tts_timer: asyncio.TimerHandle | None = None
         # The panel's speaker takes Bridge-decoded clips (its retained status).
         self._speaker_streams = False
+        # Announcement files waiting for the panel to finish them, by id.
+        self._play_waiters: dict[str, _PlayWaiter] = {}
         self._warnings = RateLimitedWarnings(_WARNING_INTERVAL_S)
         self._subscriptions = []
         self._attr_available = True
@@ -236,6 +279,7 @@ class HomeTilesAssistSatellite(AssistSatelliteEntity):
             if not online:
                 self._end_session()
                 self._finish_tts()
+                self._fail_play_waiters()
             self._refresh_available()
             self.async_write_ha_state()
 
@@ -243,12 +287,14 @@ class HomeTilesAssistSatellite(AssistSatelliteEntity):
             if not msg.payload:
                 return
             status = speaker.parse_status(msg.payload)
-            if status is not None:
-                self._speaker_streams = status["stream"]
-            if self._tts_request_id is None:
+            if status is None:
                 return
-            if (status is not None and status["id"] == self._tts_request_id
-                    and status["state"] == "idle"):
+            self._speaker_streams = status["stream"]
+            for request_id, waiter in self._play_waiters.items():
+                waiter.update(request_id, status)
+            if status["state"] != "idle":
+                return
+            if self._tts_request_id is not None and status["id"] == self._tts_request_id:
                 if status["error"]:
                     _LOGGER.warning("HomeTiles Assist answer on %s could not be played: %s",
                                     self._base, status["error"])
@@ -274,6 +320,7 @@ class HomeTilesAssistSatellite(AssistSatelliteEntity):
         await self._async_cancel_run()
         self._cancel_tts_timer()
         self._tts_request_id = None
+        self._fail_play_waiters()
         for unsubscribe in self._subscriptions:
             unsubscribe()
         self._subscriptions.clear()
@@ -373,6 +420,65 @@ class HomeTilesAssistSatellite(AssistSatelliteEntity):
         if not sent:
             raise HomeAssistantError(translation_domain=DOMAIN,
                                      translation_key="assist_not_connected")
+
+    # Announcements -------------------------------------------------------
+
+    async def async_announce(self, announcement: AssistSatelliteAnnouncement) -> None:
+        """Play the chime and the message; returns once the panel finished them."""
+        if not self.available:
+            raise HomeAssistantError(translation_domain=DOMAIN,
+                                     translation_key="assist_unavailable")
+        urls = [url for url in (announcement.preannounce_media_id, announcement.media_id) if url]
+        for url in urls:
+            await self._async_play_and_wait(url)
+
+    async def async_start_conversation(
+        self, start_announcement: AssistSatelliteAnnouncement
+    ) -> None:
+        """Announce, then listen for the answer without a wake word."""
+        await self.async_announce(start_announcement)
+        await self._async_start_run(None)
+
+    async def _async_play_and_wait(self, url: str) -> None:
+        error = speaker.playable_url_error(url, https_allowed=True)
+        if error is not None:
+            raise HomeAssistantError(translation_domain=DOMAIN,
+                                     translation_key="announcement_not_played",
+                                     translation_placeholders={"error": error})
+        request_id = speaker.new_request_id()
+        waiter = _PlayWaiter(asyncio.get_running_loop().create_future())
+        self._play_waiters[request_id] = waiter
+        try:
+            try:
+                sent = await speaker.async_publish_audio_command(
+                    self.hass, self._bridge(), self._paired, self._base,
+                    speaker.build_play_command(request_id, url), mqtt.async_publish)
+            except Exception:  # noqa: BLE001 - reported as not sent below
+                _LOGGER.debug("HomeTiles announcement for %s failed", self._base,
+                              exc_info=True)
+                sent = False
+            if not sent:
+                raise HomeAssistantError(translation_domain=DOMAIN,
+                                         translation_key="announcement_not_sent")
+            try:
+                error = await asyncio.wait_for(waiter.future, ANNOUNCE_FINISH_TIMEOUT_S)
+            except TimeoutError:
+                if self._warnings.allow("announce_timeout", monotonic()):
+                    _LOGGER.warning("HomeTiles announcement on %s did not report finishing",
+                                    self._base)
+                return
+            if error is not None:
+                raise HomeAssistantError(translation_domain=DOMAIN,
+                                         translation_key="announcement_not_played",
+                                         translation_placeholders={"error": error})
+        finally:
+            self._play_waiters.pop(request_id, None)
+
+    @callback
+    def _fail_play_waiters(self) -> None:
+        """The panel went offline (or the entity is removed): stop waiting."""
+        for waiter in self._play_waiters.values():
+            waiter.finish("offline")
 
     # Commands ------------------------------------------------------------
 

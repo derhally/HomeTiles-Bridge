@@ -130,6 +130,10 @@ def assist_wake_word_select_unique_id(device_id: str) -> str:
     return f"{device_id}_assist_wake_word"
 
 
+def assist_screen_style_select_unique_id(device_id: str) -> str:
+    return f"{device_id}_assist_screen_style"
+
+
 def assist_microphone_switch_unique_id(device_id: str) -> str:
     return f"{device_id}_assist_microphone"
 
@@ -226,6 +230,13 @@ def build_mic_command(enabled: Any) -> str:
     return _encode({"v": ASSIST_PROTOCOL_VERSION, "op": "mic", "enabled": enabled})
 
 
+def build_screen_style_command(style: Any) -> str:
+    """The look of the panel's Assist screen (one of its "screen_styles")."""
+    if not valid_wake_word_id(style):
+        raise ValueError("invalid_screen_style")
+    return _encode({"v": ASSIST_PROTOCOL_VERSION, "op": "screen_style", "style": style})
+
+
 class AudioFrame(NamedTuple):
     session_id: str
     last: bool
@@ -306,9 +317,16 @@ def parse_status(payload: Any) -> dict[str, Any] | None:
     mic_enabled = data.get("mic_enabled")
     if not isinstance(mic_enabled, bool):
         mic_enabled = None
+    # None = firmware without Assist screen styles. The ids follow the wake
+    # word id rule ([a-z0-9_]{1,32}).
+    screen_styles = _wake_word_list(data.get("screen_styles"))
+    screen_style = data.get("screen_style")
+    if screen_styles is None or screen_style not in screen_styles:
+        screen_style = None
     return {"state": state, "id": session_id, "error": error,
             "wake_words": available, "active_wake_words": active,
-            "mic_enabled": mic_enabled}
+            "mic_enabled": mic_enabled,
+            "screen_style": screen_style, "screen_styles": screen_styles}
 
 
 class WakeEvent(NamedTuple):

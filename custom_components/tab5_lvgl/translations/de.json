@@ -266,6 +266,15 @@
           "aggressive": "Aggressiv",
           "relaxed": "Entspannt"
         }
+      },
+      "assist_screen_style": {
+        "name": "Assist-Anzeige",
+        "state": {
+          "atom": "Atom",
+          "reactor": "Reaktor",
+          "dot_halo": "Punkt-Halo",
+          "voice_pills": "Sprach-Pillen"
+        }
       }
     },
     "switch": {
@@ -370,6 +379,11 @@
     "button": {
       "assist": {
         "name": "Assist starten"
+      }
+    },
+    "media_player": {
+      "speaker": {
+        "name": "Lautsprecher"
       }
     }
   },

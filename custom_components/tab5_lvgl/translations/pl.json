@@ -341,6 +341,12 @@
     "assist_not_connected": {
       "message": "Mikrofon wyświetlacza jest nieosiągalny: szyfrowane połączenie nie jest gotowe."
     },
+    "announcement_not_sent": {
+      "message": "Komunikat nie dociera do wyświetlacza: wyświetlacz jest offline lub szyfrowane połączenie nie jest jeszcze gotowe."
+    },
+    "announcement_not_played": {
+      "message": "Wyświetlacz nie mógł odtworzyć komunikatu ({error})."
+    },
     "view_unavailable": {
       "message": "Wy\u015bwietlacz jest offline lub jego katalog widok\u00f3w nie jest gotowy."
     },

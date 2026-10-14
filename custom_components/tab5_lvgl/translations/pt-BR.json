@@ -341,6 +341,12 @@
     "assist_not_connected": {
       "message": "Não é possível acessar o microfone da tela: a conexão criptografada não está pronta."
     },
+    "announcement_not_sent": {
+      "message": "O anúncio não chega à tela: a tela está offline ou a conexão criptografada ainda não está pronta."
+    },
+    "announcement_not_played": {
+      "message": "A tela não conseguiu reproduzir o anúncio ({error})."
+    },
     "view_unavailable": {
       "message": "A tela está offline ou seu catálogo de visualizações não está pronto."
     },

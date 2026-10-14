@@ -341,6 +341,12 @@
     "assist_not_connected": {
       "message": "De microfoon van het display is niet bereikbaar: de versleutelde verbinding is niet gereed."
     },
+    "announcement_not_sent": {
+      "message": "De mededeling bereikt het scherm niet: het scherm is offline of de versleutelde verbinding is nog niet klaar."
+    },
+    "announcement_not_played": {
+      "message": "Het scherm kon de mededeling niet afspelen ({error})."
+    },
     "view_unavailable": {
       "message": "Het scherm is offline of de weergavelijst is nog niet klaar."
     },

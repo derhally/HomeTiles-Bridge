@@ -218,11 +218,48 @@
           "60min": "60 min",
           "never": "Mai"
         }
+      },
+      "pipeline": {
+        "name": "Assistente",
+        "state": {
+          "preferred": "Preferito"
+        }
+      },
+      "vad_sensitivity": {
+        "name": "Rilevamento fine del parlato",
+        "state": {
+          "default": "Predefinito",
+          "aggressive": "Aggressivo",
+          "relaxed": "Rilassato"
+        }
+      },
+      "wake_word": {
+        "name": "Parola di attivazione",
+        "state": {
+          "off": "Disattivata",
+          "okay_nabu": "Okay Nabu",
+          "hey_jarvis": "Hey Jarvis",
+          "hey_mycroft": "Hey Mycroft",
+          "alexa": "Alexa",
+          "hey_home_assistant": "Hey Home Assistant"
+        }
+      },
+      "assist_screen_style": {
+        "name": "Schermata Assist",
+        "state": {
+          "atom": "Atomo",
+          "reactor": "Reattore",
+          "dot_halo": "Alone di punti",
+          "voice_pills": "Pillole vocali"
+        }
       }
     },
     "switch": {
       "local_camera": {
         "name": "Telecamera"
+      },
+      "microphone": {
+        "name": "Microfono"
       }
     },
     "binary_sensor": {
@@ -252,6 +289,69 @@
       },
       "external_temperature": {
         "name": "Temperatura esterna"
+      },
+      "battery_voltage": {
+        "name": "Tensione della batteria"
+      },
+      "wifi_rssi": {
+        "name": "Segnale Wi-Fi"
+      },
+      "last_restart": {
+        "name": "Ultimo riavvio"
+      },
+      "reset_reason": {
+        "name": "Motivo del riavvio",
+        "state": {
+          "power_on": "Accensione",
+          "external": "Reset esterno",
+          "software": "Riavvio software",
+          "panic": "Crash",
+          "interrupt_watchdog": "Watchdog di interrupt",
+          "task_watchdog": "Watchdog di task",
+          "other_watchdog": "Altro watchdog",
+          "deep_sleep": "Risveglio dal sonno profondo",
+          "brownout": "Calo di tensione",
+          "sdio": "Reset SDIO",
+          "usb": "Reset USB",
+          "jtag": "Reset JTAG",
+          "efuse": "Errore eFuse",
+          "power_glitch": "Disturbo di alimentazione",
+          "cpu_lockup": "Blocco della CPU",
+          "unknown": "Sconosciuto"
+        }
+      },
+      "free_internal_memory": {
+        "name": "RAM interna libera"
+      },
+      "free_psram": {
+        "name": "PSRAM libera"
+      },
+      "chip_temperature": {
+        "name": "Temperatura del chip"
+      },
+      "ip_address": {
+        "name": "Indirizzo IP"
+      },
+      "firmware_version": {
+        "name": "Versione firmware"
+      },
+      "mac_address": {
+        "name": "Indirizzo MAC"
+      }
+    },
+    "assist_satellite": {
+      "assist": {
+        "name": "Assist"
+      }
+    },
+    "button": {
+      "assist": {
+        "name": "Assist"
+      }
+    },
+    "media_player": {
+      "speaker": {
+        "name": "Altoparlante"
       }
     }
   },
@@ -261,6 +361,30 @@
     },
     "invalid_view": {
       "message": "La vista selezionata non esiste più."
+    },
+    "microphone_needs_pairing": {
+      "message": "Attiva il microfono sul display (Impostazioni > Audio) oppure cifra prima la connessione: Home Assistant può attivarlo solo tramite la connessione cifrata."
+    },
+    "assist_unavailable": {
+      "message": "Il microfono del display non è disponibile: il display è offline o non lo ha annunciato."
+    },
+    "assist_not_connected": {
+      "message": "Il microfono del display non è raggiungibile: la connessione cifrata non è ancora pronta."
+    },
+    "announcement_not_sent": {
+      "message": "L’annuncio non raggiunge il display: il display è offline o la connessione cifrata non è ancora pronta."
+    },
+    "announcement_not_played": {
+      "message": "Il display non è riuscito a riprodurre l’annuncio ({error})."
+    },
+    "speaker_not_connected": {
+      "message": "L’altoparlante del display non è raggiungibile: la connessione cifrata non è ancora pronta."
+    },
+    "speaker_invalid_url": {
+      "message": "Il display può riprodurre solo un URL http:// assoluto."
+    },
+    "speaker_https_unsupported": {
+      "message": "Il display non può scaricare URL https://. Imposta un URL http:// di rete locale per Home Assistant (Impostazioni → Sistema → Rete)."
     }
   }
 }

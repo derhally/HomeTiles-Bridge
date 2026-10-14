@@ -218,11 +218,48 @@
           "60min": "60 min",
           "never": "Jamais"
         }
+      },
+      "pipeline": {
+        "name": "Assistant",
+        "state": {
+          "preferred": "Pr\u00e9f\u00e9r\u00e9"
+        }
+      },
+      "vad_sensitivity": {
+        "name": "D\u00e9tection de fin de parole",
+        "state": {
+          "default": "Par d\u00e9faut",
+          "aggressive": "Agressive",
+          "relaxed": "D\u00e9tendue"
+        }
+      },
+      "wake_word": {
+        "name": "Mot d\u2019activation",
+        "state": {
+          "off": "D\u00e9sactiv\u00e9",
+          "okay_nabu": "Okay Nabu",
+          "hey_jarvis": "Hey Jarvis",
+          "hey_mycroft": "Hey Mycroft",
+          "alexa": "Alexa",
+          "hey_home_assistant": "Hey Home Assistant"
+        }
+      },
+      "assist_screen_style": {
+        "name": "\u00c9cran Assist",
+        "state": {
+          "atom": "Atome",
+          "reactor": "R\u00e9acteur",
+          "dot_halo": "Halo de points",
+          "voice_pills": "Pilules vocales"
+        }
       }
     },
     "switch": {
       "local_camera": {
         "name": "Cam\u00e9ra"
+      },
+      "microphone": {
+        "name": "Microphone"
       }
     },
     "binary_sensor": {
@@ -252,6 +289,69 @@
       },
       "external_temperature": {
         "name": "Temp\u00e9rature externe"
+      },
+      "battery_voltage": {
+        "name": "Tension de la batterie"
+      },
+      "wifi_rssi": {
+        "name": "Signal Wi-Fi"
+      },
+      "last_restart": {
+        "name": "Dernier red\u00e9marrage"
+      },
+      "reset_reason": {
+        "name": "Raison du red\u00e9marrage",
+        "state": {
+          "power_on": "Mise sous tension",
+          "external": "R\u00e9initialisation externe",
+          "software": "Red\u00e9marrage logiciel",
+          "panic": "Plantage",
+          "interrupt_watchdog": "Watchdog d\u2019interruption",
+          "task_watchdog": "Watchdog de t\u00e2che",
+          "other_watchdog": "Autre watchdog",
+          "deep_sleep": "R\u00e9veil du sommeil profond",
+          "brownout": "Baisse de tension",
+          "sdio": "R\u00e9initialisation SDIO",
+          "usb": "R\u00e9initialisation USB",
+          "jtag": "R\u00e9initialisation JTAG",
+          "efuse": "Erreur eFuse",
+          "power_glitch": "Coupure d\u2019alimentation",
+          "cpu_lockup": "Blocage du CPU",
+          "unknown": "Inconnue"
+        }
+      },
+      "free_internal_memory": {
+        "name": "RAM interne libre"
+      },
+      "free_psram": {
+        "name": "PSRAM libre"
+      },
+      "chip_temperature": {
+        "name": "Temp\u00e9rature de la puce"
+      },
+      "ip_address": {
+        "name": "Adresse IP"
+      },
+      "firmware_version": {
+        "name": "Version du firmware"
+      },
+      "mac_address": {
+        "name": "Adresse MAC"
+      }
+    },
+    "assist_satellite": {
+      "assist": {
+        "name": "Assist"
+      }
+    },
+    "button": {
+      "assist": {
+        "name": "Assist"
+      }
+    },
+    "media_player": {
+      "speaker": {
+        "name": "Haut-parleur"
       }
     }
   },
@@ -261,6 +361,30 @@
     },
     "invalid_view": {
       "message": "La vue s\u00e9lectionn\u00e9e n'existe plus."
+    },
+    "microphone_needs_pairing": {
+      "message": "Activez le microphone sur l\u2019\u00e9cran (Param\u00e8tres > Audio) ou chiffrez d\u2019abord la connexion : Home Assistant ne peut l\u2019activer que via la connexion chiffr\u00e9e."
+    },
+    "assist_unavailable": {
+      "message": "Le microphone de l\u2019\u00e9cran n\u2019est pas disponible : l\u2019\u00e9cran est hors ligne ou ne l\u2019a pas annonc\u00e9."
+    },
+    "assist_not_connected": {
+      "message": "Le microphone de l\u2019\u00e9cran est injoignable : la connexion chiffr\u00e9e n\u2019est pas encore pr\u00eate."
+    },
+    "announcement_not_sent": {
+      "message": "L\u2019annonce n\u2019atteint pas l\u2019\u00e9cran : l\u2019\u00e9cran est hors ligne ou la connexion chiffr\u00e9e n\u2019est pas encore pr\u00eate."
+    },
+    "announcement_not_played": {
+      "message": "L\u2019\u00e9cran n\u2019a pas pu lire l\u2019annonce ({error})."
+    },
+    "speaker_not_connected": {
+      "message": "Le haut-parleur de l\u2019\u00e9cran est injoignable : la connexion chiffr\u00e9e n\u2019est pas encore pr\u00eate."
+    },
+    "speaker_invalid_url": {
+      "message": "L\u2019\u00e9cran ne peut lire qu\u2019une URL http:// absolue."
+    },
+    "speaker_https_unsupported": {
+      "message": "L\u2019\u00e9cran ne peut pas t\u00e9l\u00e9charger d\u2019URL https://. D\u00e9finissez une URL http:// du r\u00e9seau local pour Home Assistant (Param\u00e8tres \u2192 Syst\u00e8me \u2192 R\u00e9seau)."
     }
   }
 }

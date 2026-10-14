@@ -218,11 +218,48 @@
           "60min": "60 мин",
           "never": "Никогда"
         }
+      },
+      "pipeline": {
+        "name": "Ассистент",
+        "state": {
+          "preferred": "Предпочтительный"
+        }
+      },
+      "vad_sensitivity": {
+        "name": "Определение конца речи",
+        "state": {
+          "default": "По умолчанию",
+          "aggressive": "Агрессивное",
+          "relaxed": "Спокойное"
+        }
+      },
+      "wake_word": {
+        "name": "Слово активации",
+        "state": {
+          "off": "Выключено",
+          "okay_nabu": "Okay Nabu",
+          "hey_jarvis": "Hey Jarvis",
+          "hey_mycroft": "Hey Mycroft",
+          "alexa": "Alexa",
+          "hey_home_assistant": "Hey Home Assistant"
+        }
+      },
+      "assist_screen_style": {
+        "name": "Экран Assist",
+        "state": {
+          "atom": "Атом",
+          "reactor": "Реактор",
+          "dot_halo": "Ореол из точек",
+          "voice_pills": "Голосовые капсулы"
+        }
       }
     },
     "switch": {
       "local_camera": {
         "name": "Камера"
+      },
+      "microphone": {
+        "name": "Микрофон"
       }
     },
     "binary_sensor": {
@@ -252,6 +289,69 @@
       },
       "external_temperature": {
         "name": "Внешняя температура"
+      },
+      "battery_voltage": {
+        "name": "Напряжение батареи"
+      },
+      "wifi_rssi": {
+        "name": "Сигнал Wi-Fi"
+      },
+      "last_restart": {
+        "name": "Последний перезапуск"
+      },
+      "reset_reason": {
+        "name": "Причина перезапуска",
+        "state": {
+          "power_on": "Включение питания",
+          "external": "Внешний сброс",
+          "software": "Программный перезапуск",
+          "panic": "Сбой",
+          "interrupt_watchdog": "Watchdog прерываний",
+          "task_watchdog": "Watchdog задач",
+          "other_watchdog": "Другой watchdog",
+          "deep_sleep": "Выход из глубокого сна",
+          "brownout": "Просадка напряжения",
+          "sdio": "Сброс SDIO",
+          "usb": "Сброс USB",
+          "jtag": "Сброс JTAG",
+          "efuse": "Ошибка eFuse",
+          "power_glitch": "Сбой питания",
+          "cpu_lockup": "Блокировка CPU",
+          "unknown": "Неизвестно"
+        }
+      },
+      "free_internal_memory": {
+        "name": "Свободная внутренняя RAM"
+      },
+      "free_psram": {
+        "name": "Свободная PSRAM"
+      },
+      "chip_temperature": {
+        "name": "Температура чипа"
+      },
+      "ip_address": {
+        "name": "IP-адрес"
+      },
+      "firmware_version": {
+        "name": "Версия прошивки"
+      },
+      "mac_address": {
+        "name": "MAC-адрес"
+      }
+    },
+    "assist_satellite": {
+      "assist": {
+        "name": "Assist"
+      }
+    },
+    "button": {
+      "assist": {
+        "name": "Assist"
+      }
+    },
+    "media_player": {
+      "speaker": {
+        "name": "Динамик"
       }
     }
   },
@@ -261,6 +361,30 @@
     },
     "invalid_view": {
       "message": "Выбранный вид больше не существует."
+    },
+    "microphone_needs_pairing": {
+      "message": "Включите микрофон на дисплее (Настройки > Звук) или сначала зашифруйте соединение: Home Assistant может включить его только через зашифрованное соединение."
+    },
+    "assist_unavailable": {
+      "message": "Микрофон дисплея недоступен: дисплей не в сети или не сообщил о нём."
+    },
+    "assist_not_connected": {
+      "message": "Микрофон дисплея недоступен: зашифрованное соединение ещё не готово."
+    },
+    "announcement_not_sent": {
+      "message": "Объявление не доходит до дисплея: дисплей не в сети или зашифрованное соединение ещё не готово."
+    },
+    "announcement_not_played": {
+      "message": "Дисплею не удалось воспроизвести объявление ({error})."
+    },
+    "speaker_not_connected": {
+      "message": "Динамик дисплея недоступен: зашифрованное соединение ещё не готово."
+    },
+    "speaker_invalid_url": {
+      "message": "Дисплей может воспроизводить только абсолютный URL http://."
+    },
+    "speaker_https_unsupported": {
+      "message": "Дисплей не может загружать URL https://. Укажите для Home Assistant URL http:// локальной сети (Настройки → Система → Сеть)."
     }
   }
 }

@@ -218,11 +218,48 @@
           "60min": "60 min",
           "never": "Nooit"
         }
+      },
+      "pipeline": {
+        "name": "Assistent",
+        "state": {
+          "preferred": "Voorkeur"
+        }
+      },
+      "vad_sensitivity": {
+        "name": "Detectie einde spraak",
+        "state": {
+          "default": "Standaard",
+          "aggressive": "Agressief",
+          "relaxed": "Ontspannen"
+        }
+      },
+      "wake_word": {
+        "name": "Wekwoord",
+        "state": {
+          "off": "Uit",
+          "okay_nabu": "Okay Nabu",
+          "hey_jarvis": "Hey Jarvis",
+          "hey_mycroft": "Hey Mycroft",
+          "alexa": "Alexa",
+          "hey_home_assistant": "Hey Home Assistant"
+        }
+      },
+      "assist_screen_style": {
+        "name": "Assist-scherm",
+        "state": {
+          "atom": "Atoom",
+          "reactor": "Reactor",
+          "dot_halo": "Puntenhalo",
+          "voice_pills": "Spraakpillen"
+        }
       }
     },
     "switch": {
       "local_camera": {
         "name": "Camera"
+      },
+      "microphone": {
+        "name": "Microfoon"
       }
     },
     "binary_sensor": {
@@ -252,6 +289,69 @@
       },
       "external_temperature": {
         "name": "Externe temperatuur"
+      },
+      "battery_voltage": {
+        "name": "Accuspanning"
+      },
+      "wifi_rssi": {
+        "name": "Wifi-signaal"
+      },
+      "last_restart": {
+        "name": "Laatste herstart"
+      },
+      "reset_reason": {
+        "name": "Reden van herstart",
+        "state": {
+          "power_on": "Inschakelen",
+          "external": "Externe reset",
+          "software": "Software-herstart",
+          "panic": "Crash",
+          "interrupt_watchdog": "Interrupt-watchdog",
+          "task_watchdog": "Taak-watchdog",
+          "other_watchdog": "Andere watchdog",
+          "deep_sleep": "Ontwaken uit diepe slaap",
+          "brownout": "Spanningsdip",
+          "sdio": "SDIO-reset",
+          "usb": "USB-reset",
+          "jtag": "JTAG-reset",
+          "efuse": "eFuse-fout",
+          "power_glitch": "Stroomstoring",
+          "cpu_lockup": "CPU-blokkade",
+          "unknown": "Onbekend"
+        }
+      },
+      "free_internal_memory": {
+        "name": "Vrij intern RAM"
+      },
+      "free_psram": {
+        "name": "Vrij PSRAM"
+      },
+      "chip_temperature": {
+        "name": "Chiptemperatuur"
+      },
+      "ip_address": {
+        "name": "IP-adres"
+      },
+      "firmware_version": {
+        "name": "Firmwareversie"
+      },
+      "mac_address": {
+        "name": "MAC-adres"
+      }
+    },
+    "assist_satellite": {
+      "assist": {
+        "name": "Assist"
+      }
+    },
+    "button": {
+      "assist": {
+        "name": "Assist"
+      }
+    },
+    "media_player": {
+      "speaker": {
+        "name": "Luidspreker"
       }
     }
   },
@@ -261,6 +361,30 @@
     },
     "invalid_view": {
       "message": "De gekozen weergave bestaat niet meer."
+    },
+    "microphone_needs_pairing": {
+      "message": "Zet de microfoon aan op het scherm (Instellingen > Audio) of versleutel eerst de verbinding: Home Assistant mag hem alleen via de versleutelde verbinding aanzetten."
+    },
+    "assist_unavailable": {
+      "message": "De microfoon van het scherm is niet beschikbaar: het scherm is offline of heeft hem niet gemeld."
+    },
+    "assist_not_connected": {
+      "message": "De microfoon van het scherm is niet bereikbaar: de versleutelde verbinding is nog niet klaar."
+    },
+    "announcement_not_sent": {
+      "message": "De mededeling bereikt het scherm niet: het scherm is offline of de versleutelde verbinding is nog niet klaar."
+    },
+    "announcement_not_played": {
+      "message": "Het scherm kon de mededeling niet afspelen ({error})."
+    },
+    "speaker_not_connected": {
+      "message": "De luidspreker van het scherm is niet bereikbaar: de versleutelde verbinding is nog niet klaar."
+    },
+    "speaker_invalid_url": {
+      "message": "Het scherm kan alleen een absolute http://-URL afspelen."
+    },
+    "speaker_https_unsupported": {
+      "message": "Het scherm kan geen https://-URL's downloaden. Stel een http://-URL in het lokale netwerk in voor Home Assistant (Instellingen → Systeem → Netwerk)."
     }
   }
 }

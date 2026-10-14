@@ -218,11 +218,48 @@
           "60min": "60 min",
           "never": "Nigdy"
         }
+      },
+      "pipeline": {
+        "name": "Asystent",
+        "state": {
+          "preferred": "Preferowany"
+        }
+      },
+      "vad_sensitivity": {
+        "name": "Wykrywanie ko\u0144ca mowy",
+        "state": {
+          "default": "Domy\u015blne",
+          "aggressive": "Agresywne",
+          "relaxed": "Swobodne"
+        }
+      },
+      "wake_word": {
+        "name": "S\u0142owo aktywuj\u0105ce",
+        "state": {
+          "off": "Wy\u0142\u0105czone",
+          "okay_nabu": "Okay Nabu",
+          "hey_jarvis": "Hey Jarvis",
+          "hey_mycroft": "Hey Mycroft",
+          "alexa": "Alexa",
+          "hey_home_assistant": "Hey Home Assistant"
+        }
+      },
+      "assist_screen_style": {
+        "name": "Ekran Assist",
+        "state": {
+          "atom": "Atom",
+          "reactor": "Reaktor",
+          "dot_halo": "Aureola z kropek",
+          "voice_pills": "G\u0142osowe pigu\u0142ki"
+        }
       }
     },
     "switch": {
       "local_camera": {
         "name": "Kamera"
+      },
+      "microphone": {
+        "name": "Mikrofon"
       }
     },
     "binary_sensor": {
@@ -252,6 +289,69 @@
       },
       "external_temperature": {
         "name": "Temperatura zewn\u0119trzna"
+      },
+      "battery_voltage": {
+        "name": "Napi\u0119cie baterii"
+      },
+      "wifi_rssi": {
+        "name": "Sygna\u0142 Wi-Fi"
+      },
+      "last_restart": {
+        "name": "Ostatni restart"
+      },
+      "reset_reason": {
+        "name": "Przyczyna restartu",
+        "state": {
+          "power_on": "W\u0142\u0105czenie zasilania",
+          "external": "Reset zewn\u0119trzny",
+          "software": "Restart programowy",
+          "panic": "Awaria",
+          "interrupt_watchdog": "Watchdog przerwa\u0144",
+          "task_watchdog": "Watchdog zada\u0144",
+          "other_watchdog": "Inny watchdog",
+          "deep_sleep": "Wybudzenie z g\u0142\u0119bokiego u\u015bpienia",
+          "brownout": "Spadek napi\u0119cia",
+          "sdio": "Reset SDIO",
+          "usb": "Reset USB",
+          "jtag": "Reset JTAG",
+          "efuse": "B\u0142\u0105d eFuse",
+          "power_glitch": "Zak\u0142\u00f3cenie zasilania",
+          "cpu_lockup": "Zablokowanie CPU",
+          "unknown": "Nieznana"
+        }
+      },
+      "free_internal_memory": {
+        "name": "Wolna pami\u0119\u0107 RAM"
+      },
+      "free_psram": {
+        "name": "Wolna PSRAM"
+      },
+      "chip_temperature": {
+        "name": "Temperatura uk\u0142adu"
+      },
+      "ip_address": {
+        "name": "Adres IP"
+      },
+      "firmware_version": {
+        "name": "Wersja oprogramowania"
+      },
+      "mac_address": {
+        "name": "Adres MAC"
+      }
+    },
+    "assist_satellite": {
+      "assist": {
+        "name": "Assist"
+      }
+    },
+    "button": {
+      "assist": {
+        "name": "Assist"
+      }
+    },
+    "media_player": {
+      "speaker": {
+        "name": "G\u0142o\u015bnik"
       }
     }
   },
@@ -261,6 +361,30 @@
     },
     "invalid_view": {
       "message": "Wybrany widok ju\u017c nie istnieje."
+    },
+    "microphone_needs_pairing": {
+      "message": "W\u0142\u0105cz mikrofon na wy\u015bwietlaczu (Ustawienia > D\u017awi\u0119k) lub najpierw zaszyfruj po\u0142\u0105czenie: Home Assistant mo\u017ce go w\u0142\u0105czy\u0107 tylko przez szyfrowane po\u0142\u0105czenie."
+    },
+    "assist_unavailable": {
+      "message": "Mikrofon wy\u015bwietlacza jest niedost\u0119pny: wy\u015bwietlacz jest offline lub go nie zg\u0142osi\u0142."
+    },
+    "assist_not_connected": {
+      "message": "Mikrofon wy\u015bwietlacza jest nieosi\u0105galny: szyfrowane po\u0142\u0105czenie nie jest jeszcze gotowe."
+    },
+    "announcement_not_sent": {
+      "message": "Komunikat nie dociera do wy\u015bwietlacza: wy\u015bwietlacz jest offline lub szyfrowane po\u0142\u0105czenie nie jest jeszcze gotowe."
+    },
+    "announcement_not_played": {
+      "message": "Wy\u015bwietlacz nie m\u00f3g\u0142 odtworzy\u0107 komunikatu ({error})."
+    },
+    "speaker_not_connected": {
+      "message": "G\u0142o\u015bnik wy\u015bwietlacza jest nieosi\u0105galny: szyfrowane po\u0142\u0105czenie nie jest jeszcze gotowe."
+    },
+    "speaker_invalid_url": {
+      "message": "Wy\u015bwietlacz mo\u017ce odtworzy\u0107 tylko bezwzgl\u0119dny adres URL http://."
+    },
+    "speaker_https_unsupported": {
+      "message": "Wy\u015bwietlacz nie mo\u017ce pobiera\u0107 adres\u00f3w URL https://. Ustaw dla Home Assistant adres URL http:// w sieci lokalnej (Ustawienia \u2192 System \u2192 Sie\u0107)."
     }
   }
 }

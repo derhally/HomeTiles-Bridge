@@ -339,6 +339,12 @@
     "assist_not_connected": {
       "message": "No se puede acceder al micrófono de la pantalla: la conexión cifrada no está lista."
     },
+    "announcement_not_sent": {
+      "message": "El anuncio no llega a la pantalla: la pantalla está desconectada o la conexión cifrada aún no está lista."
+    },
+    "announcement_not_played": {
+      "message": "La pantalla no pudo reproducir el anuncio ({error})."
+    },
     "view_unavailable": {
       "message": "La pantalla está desconectada o su catálogo de vistas no está listo."
     },

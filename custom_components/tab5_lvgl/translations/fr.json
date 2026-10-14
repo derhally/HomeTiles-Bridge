@@ -339,6 +339,12 @@
     "assist_not_connected": {
       "message": "Le microphone de l'écran est injoignable : la connexion chiffrée n'est pas prête."
     },
+    "announcement_not_sent": {
+      "message": "L’annonce n’atteint pas l’écran : l’écran est hors ligne ou la connexion chiffrée n’est pas encore prête."
+    },
+    "announcement_not_played": {
+      "message": "L’écran n’a pas pu lire l’annonce ({error})."
+    },
     "view_unavailable": {
       "message": "L'\u00e9cran est hors ligne ou son catalogue de vues n'est pas pr\u00eat."
     },

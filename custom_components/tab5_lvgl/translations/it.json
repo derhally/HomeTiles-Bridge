@@ -339,6 +339,12 @@
     "assist_not_connected": {
       "message": "Il microfono del display non è raggiungibile: la connessione cifrata non è pronta."
     },
+    "announcement_not_sent": {
+      "message": "L’annuncio non raggiunge il display: il display è offline o la connessione cifrata non è ancora pronta."
+    },
+    "announcement_not_played": {
+      "message": "Il display non è riuscito a riprodurre l’annuncio ({error})."
+    },
     "view_unavailable": {
       "message": "Il display è offline o il suo catalogo delle viste non è pronto."
     },

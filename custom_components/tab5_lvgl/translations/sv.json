@@ -339,6 +339,12 @@
     "assist_not_connected": {
       "message": "Skärmens mikrofon kan inte nås: den krypterade anslutningen är inte redo."
     },
+    "announcement_not_sent": {
+      "message": "Meddelandet når inte skärmen: skärmen är offline eller den krypterade anslutningen är inte klar ännu."
+    },
+    "announcement_not_played": {
+      "message": "Skärmen kunde inte spela upp meddelandet ({error})."
+    },
     "view_unavailable": {
       "message": "Skärmen är offline eller dess vykatalog är inte klar."
     },

@@ -83,4 +83,5 @@ def stale_assist(unique_id: str, domain: str, data: Mapping[str, Any]) -> bool:
             or (domain == "button" and unique_id.endswith("_assist"))
             or (domain == "switch" and unique_id.endswith("_assist_microphone"))
             or (domain == "select" and unique_id.endswith(
-                ("_assist-pipeline", "_assist-vad_sensitivity", "_assist_wake_word"))))
+                ("_assist-pipeline", "_assist-vad_sensitivity", "_assist_wake_word",
+                 "_assist_screen_style"))))

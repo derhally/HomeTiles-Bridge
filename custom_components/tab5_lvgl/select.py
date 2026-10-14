@@ -19,6 +19,7 @@ from . import link_mqtt as mqtt
 from .assist import (
     ASSIST_SATELLITES_KEY,
     assist_select_prefix,
+    assist_screen_style_select_unique_id,
     assist_status_topic,
     assist_wake_word_select_unique_id,
     parse_status,
@@ -62,6 +63,7 @@ async def async_setup_entry(
         entities.append(HomeTilesViewSelect(entry, base_topic))
     if supports(capabilities, "audio_input"):
         entities.append(HomeTilesWakeWordSelect(entry, base_topic))
+        entities.append(HomeTilesScreenStyleSelect(entry, base_topic))
         entities.extend(_assist_selects(hass, entry))
     async_add_entities(entities)
 
@@ -339,6 +341,82 @@ class HomeTilesWakeWordSelect(SelectEntity):
         await satellite.async_set_active_wake_words(words)
         # The panel's retained status confirms it; until then show the request.
         self._active = words
+        self.async_write_ha_state()
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+
+        async def handle_status(msg: mqtt.ReceiveMessage) -> None:
+            if self.apply_status(msg.payload):
+                self.async_write_ha_state()
+
+        self._unsubscribe = await mqtt.async_subscribe(
+            self.hass, assist_status_topic(self._base), handle_status, qos=0)
+
+    async def async_will_remove_from_hass(self) -> None:
+        if self._unsubscribe is not None:
+            self._unsubscribe()
+            self._unsubscribe = None
+
+
+class HomeTilesScreenStyleSelect(SelectEntity):
+    """Look of the panel's Assist screen, from the styles the panel reports.
+
+    Unavailable on firmware that reports no styles. The choice goes through
+    the satellite (sealed when paired) and the panel stores it.
+    """
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "assist_screen_style"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_icon = "mdi:creation"
+    _attr_should_poll = False
+
+    def __init__(self, entry: ConfigEntry, base_topic: str) -> None:
+        self._entry_id = entry.entry_id
+        self._attr_device_info = entry_device_info(entry)
+        self._attr_unique_id = assist_screen_style_select_unique_id(entry_device_id(entry))
+        self._base = base_topic
+        self._styles: list[str] = []
+        self._style: str | None = None
+        self._unsubscribe = None
+
+    @property
+    def available(self) -> bool:
+        return bool(self._styles)
+
+    @property
+    def options(self) -> list[str]:
+        return list(self._styles)
+
+    @property
+    def current_option(self) -> str | None:
+        return self._style if self._styles else None
+
+    def apply_status(self, payload) -> bool:
+        """Mirror the panel's retained Assist status; False when ignored."""
+        if not payload:
+            self._styles = []
+            self._style = None
+            return True
+        status = parse_status(payload)
+        if status is None:
+            return False
+        self._styles = status["screen_styles"] or []
+        self._style = status["screen_style"]
+        return True
+
+    async def async_select_option(self, option: str) -> None:
+        if option not in self._styles:
+            raise HomeAssistantError(f"Unknown Assist screen style: {option}")
+        satellite = (self.hass.data.get(DOMAIN, {})
+                     .get(ASSIST_SATELLITES_KEY, {}).get(self._entry_id))
+        if satellite is None:
+            raise HomeAssistantError(translation_domain=DOMAIN,
+                                     translation_key="assist_unavailable")
+        await satellite.async_set_screen_style(option)
+        # The panel's retained status confirms it; until then show the request.
+        self._style = option
         self.async_write_ha_state()
 
     async def async_added_to_hass(self) -> None:

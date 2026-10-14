@@ -191,6 +191,15 @@
           "never": "Nie"
         }
       },
+      "assist_screen_style": {
+        "name": "Assist-Anzeige",
+        "state": {
+          "atom": "Atom",
+          "reactor": "Reaktor",
+          "dot_halo": "Punkt-Halo",
+          "voice_pills": "Sprach-Pillen"
+        }
+      },
       "wake_word": {
         "name": "Aktivierungswort",
         "state": {

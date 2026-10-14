@@ -191,6 +191,15 @@
           "never": "Never"
         }
       },
+      "assist_screen_style": {
+        "name": "Assist screen",
+        "state": {
+          "atom": "Atom",
+          "reactor": "Reactor",
+          "dot_halo": "Dot Halo",
+          "voice_pills": "Voice Pills"
+        }
+      },
       "wake_word": {
         "name": "Wake word",
         "state": {

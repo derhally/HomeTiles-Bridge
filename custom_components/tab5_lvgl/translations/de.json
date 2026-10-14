@@ -365,6 +365,12 @@
     "assist_not_connected": {
       "message": "Das Mikrofon des Displays ist nicht erreichbar: Die verschl\u00fcsselte Verbindung ist noch nicht bereit."
     },
+    "announcement_not_sent": {
+      "message": "Die Durchsage erreicht das Display nicht: Das Display ist offline oder die verschl\u00fcsselte Verbindung ist noch nicht bereit."
+    },
+    "announcement_not_played": {
+      "message": "Das Display konnte die Durchsage nicht abspielen ({error})."
+    },
     "view_unavailable": {
       "message": "Das Display ist offline oder seine Ansichtsliste ist noch nicht bereit."
     },

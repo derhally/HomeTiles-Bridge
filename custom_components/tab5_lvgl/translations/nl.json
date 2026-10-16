@@ -273,7 +273,12 @@
           "atom": "Atoom",
           "reactor": "Reactor",
           "dot_halo": "Puntenhalo",
-          "voice_pills": "Spraakpillen"
+          "voice_pills": "Spraakpillen",
+          "sentinel": "Schildwacht",
+          "phosphor": "Fosfor",
+          "light_disc": "Lichtschijf",
+          "lens": "Lens",
+          "iris": "Iris"
         }
       }
     },

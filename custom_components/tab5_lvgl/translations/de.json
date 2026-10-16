@@ -273,7 +273,12 @@
           "atom": "Atom",
           "reactor": "Reaktor",
           "dot_halo": "Punkt-Halo",
-          "voice_pills": "Sprach-Pillen"
+          "voice_pills": "Sprach-Pillen",
+          "sentinel": "W\u00e4chter",
+          "phosphor": "Phosphor",
+          "light_disc": "Lichtscheibe",
+          "lens": "Linse",
+          "iris": "Iris"
         }
       }
     },

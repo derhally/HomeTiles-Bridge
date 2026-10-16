@@ -272,7 +272,12 @@
           "atom": "Atom",
           "reactor": "Reaktor",
           "dot_halo": "Punkthalo",
-          "voice_pills": "Röstpiller"
+          "voice_pills": "Röstpiller",
+          "sentinel": "Väktare",
+          "phosphor": "Fosfor",
+          "light_disc": "Ljusskiva",
+          "lens": "Lins",
+          "iris": "Iris"
         }
       }
     },

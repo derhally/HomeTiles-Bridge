@@ -272,7 +272,12 @@
           "atom": "Atom",
           "reactor": "Reaktor",
           "dot_halo": "Aureola z kropek",
-          "voice_pills": "G\u0142osowe pigu\u0142ki"
+          "voice_pills": "G\u0142osowe pigu\u0142ki",
+          "sentinel": "Stra\u017cnik",
+          "phosphor": "Fosfor",
+          "light_disc": "Dysk \u015bwiat\u0142a",
+          "lens": "Soczewka",
+          "iris": "T\u0119cz\u00f3wka"
         }
       }
     },

@@ -272,7 +272,12 @@
           "atom": "Atom",
           "reactor": "Reactor",
           "dot_halo": "Dot Halo",
-          "voice_pills": "Voice Pills"
+          "voice_pills": "Voice Pills",
+          "sentinel": "Sentinel",
+          "phosphor": "Phosphor",
+          "light_disc": "Light Disc",
+          "lens": "Lens",
+          "iris": "Iris"
         }
       }
     },

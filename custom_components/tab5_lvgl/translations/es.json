@@ -250,7 +250,12 @@
           "atom": "Átomo",
           "reactor": "Reactor",
           "dot_halo": "Halo de puntos",
-          "voice_pills": "Píldoras de voz"
+          "voice_pills": "Píldoras de voz",
+          "sentinel": "Centinela",
+          "phosphor": "Fósforo",
+          "light_disc": "Disco de luz",
+          "lens": "Lente",
+          "iris": "Iris"
         }
       }
     },

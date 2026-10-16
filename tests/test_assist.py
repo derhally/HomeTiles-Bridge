@@ -403,7 +403,9 @@ class WakeWordSelectTest(unittest.IsolatedAsyncioTestCase):
 class ScreenStyleTest(unittest.IsolatedAsyncioTestCase):
     """The Assist screen style: status fields, command and select."""
 
-    STYLES = ["atom", "reactor", "dot_halo", "voice_pills"]
+    # The firmware's catalog (src/audio/assist_contract.h kScreenStyleIds).
+    STYLES = ["atom", "reactor", "dot_halo", "voice_pills", "sentinel", "phosphor", "light_disc",
+              "lens", "iris"]
 
     def status(self, **fields):
         payload = {"v": 1, "state": "idle", "screen_style": "reactor",
@@ -421,6 +423,13 @@ class ScreenStyleTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual((status["screen_style"], status["screen_styles"]), (None, None))
         self.assertEqual(ASSIST.parse_status(self.status(
             screen_styles=["atom", "Bad Id", 3, "atom"]))["screen_styles"], ["atom"])
+
+    def test_every_style_has_a_name(self):
+        # Without a state name Home Assistant shows the raw id ("light_disc").
+        strings = json.loads((ROOT / "strings.json")
+                             .read_text(encoding="utf-8"))
+        states = strings["entity"]["select"]["assist_screen_style"]["state"]
+        self.assertEqual(sorted(states), sorted(self.STYLES))
 
     def test_command(self):
         self.assertEqual(json.loads(ASSIST.build_screen_style_command("dot_halo")),

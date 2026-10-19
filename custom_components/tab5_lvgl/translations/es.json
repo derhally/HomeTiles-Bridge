@@ -243,6 +243,15 @@
           "aggressive": "Agresivo",
           "relaxed": "Relajado"
         }
+      },
+      "assist_screen_style": {
+        "name": "Pantalla de Assist",
+        "state": {
+          "atom": "Átomo",
+          "reactor": "Reactor",
+          "dot_halo": "Halo de puntos",
+          "voice_pills": "Píldoras de voz"
+        }
       }
     },
     "switch": {
@@ -280,6 +289,54 @@
       },
       "external_temperature": {
         "name": "Temperatura externa"
+      },
+      "battery_voltage": {
+        "name": "Tensión de la batería"
+      },
+      "wifi_rssi": {
+        "name": "Señal Wi-Fi"
+      },
+      "last_restart": {
+        "name": "Último reinicio"
+      },
+      "reset_reason": {
+        "name": "Motivo del reinicio",
+        "state": {
+          "power_on": "Encendido",
+          "external": "Reinicio externo",
+          "software": "Reinicio por software",
+          "panic": "Fallo",
+          "interrupt_watchdog": "Watchdog de interrupción",
+          "task_watchdog": "Watchdog de tarea",
+          "other_watchdog": "Otro watchdog",
+          "deep_sleep": "Salida de sueño profundo",
+          "brownout": "Caída de tensión",
+          "sdio": "Reinicio SDIO",
+          "usb": "Reinicio USB",
+          "jtag": "Reinicio JTAG",
+          "efuse": "Error de eFuse",
+          "power_glitch": "Fallo de alimentación",
+          "cpu_lockup": "Bloqueo de la CPU",
+          "unknown": "Desconocido"
+        }
+      },
+      "free_internal_memory": {
+        "name": "RAM interna libre"
+      },
+      "free_psram": {
+        "name": "PSRAM libre"
+      },
+      "chip_temperature": {
+        "name": "Temperatura del chip"
+      },
+      "ip_address": {
+        "name": "Dirección IP"
+      },
+      "firmware_version": {
+        "name": "Versión del firmware"
+      },
+      "mac_address": {
+        "name": "Dirección MAC"
       }
     },
     "assist_satellite": {
@@ -316,6 +373,12 @@
     },
     "speaker_not_connected": {
       "message": "No se puede acceder al altavoz de la pantalla: la conexión cifrada no está lista."
+    },
+    "announcement_not_sent": {
+      "message": "El anuncio no llega a la pantalla: la pantalla está desconectada o la conexión cifrada aún no está lista."
+    },
+    "announcement_not_played": {
+      "message": "La pantalla no pudo reproducir el anuncio ({error})."
     }
   }
 }

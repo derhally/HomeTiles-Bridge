@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 from datetime import timedelta
 import json
 from time import monotonic
@@ -42,6 +44,8 @@ from .device_helpers import (
     entry_device_info,
     state_topic,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
@@ -504,11 +508,17 @@ class HomeTilesScreenStyleSelect(SelectEntity):
         self._base = base_topic
         self._styles: list[str] = []
         self._style: str | None = None
+        self._error: str | None = None
         self._unsubscribe = None
 
     @property
     def available(self) -> bool:
         return bool(self._styles)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        # Why the chosen screen file from <config>/hometiles/assist_screens was refused.
+        return {"screen_error": self._error} if self._error else {}
 
     @property
     def options(self) -> list[str]:
@@ -523,12 +533,17 @@ class HomeTilesScreenStyleSelect(SelectEntity):
         if not payload:
             self._styles = []
             self._style = None
+            self._error = None
             return True
         status = parse_status(payload)
         if status is None:
             return False
         self._styles = status["screen_styles"] or []
         self._style = status["screen_style"]
+        error = status.get("screen_error")
+        if error and error != self._error:
+            _LOGGER.warning("HomeTiles panel %s refused the Assist screen %s: %s", self._base, self._style, error)
+        self._error = error
         return True
 
     async def async_select_option(self, option: str) -> None:

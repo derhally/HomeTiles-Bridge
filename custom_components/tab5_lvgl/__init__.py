@@ -173,6 +173,7 @@ from .const import (
   HISTORY_RESPONSE_SUFFIX,
   PAIRING_UNIQUE_ID_PREFIX,
   SERVICE_PUBLISH_SNAPSHOT,
+  SERVICE_RELOAD_ASSIST_SCREENS,
   WEATHER_REQUEST_SUFFIX,
 )
 from .cover_helpers import (
@@ -276,6 +277,10 @@ from .speaker import (
   new_request_id,
 )
 from .assist import assist_command_topic
+from .assist_screens import ASSIST_SCREENS_DIR, AssistScreenCatalog, scan_screens
+
+# hass.data[DOMAIN][DATA_ASSIST_SCREENS]: the offered Assist screen files.
+DATA_ASSIST_SCREENS = "assist_screens"
 from .numeric_history import fetch_numeric_history_values
 from .request_limits import (
   ENERGY_MAX_ACTIVE,
@@ -763,6 +768,41 @@ def _create_image_service(hass: HomeAssistant, runtime: LinkRuntime) -> ImageSer
   return ImageService(runtime.broker, source=source, render=render, allowed=allowed, track=track)
 
 
+async def _async_scan_assist_screens(hass: HomeAssistant, catalog: AssistScreenCatalog) -> None:
+  directory = hass.config.path(*ASSIST_SCREENS_DIR)
+  try:
+    screens, problems = await hass.async_add_executor_job(scan_screens, directory)
+  except OSError as err:
+    _LOGGER.warning("HomeTiles Assist screens: %s cannot be read: %s", directory, err)
+    return
+  for problem in problems:
+    _LOGGER.warning("HomeTiles Assist screen left out: %s", problem)
+  catalog.set_screens(screens)
+  if screens:
+    _LOGGER.info("HomeTiles Assist screens offered: %s", ", ".join(s.id for s in screens))
+
+
+async def _async_setup_assist_screens(hass: HomeAssistant, domain_data: Dict[str, Any]) -> None:
+  """Screen files from <config>/hometiles/assist_screens (assist_screens.py)."""
+  if DATA_ASSIST_SCREENS in domain_data:
+    return
+
+  async def publish(topic: str, payload: str, retain: bool) -> None:
+    await mqtt.async_publish(hass, topic, payload, retain=retain)
+
+  catalog = AssistScreenCatalog(publish)
+  domain_data[DATA_ASSIST_SCREENS] = catalog
+  await _async_scan_assist_screens(hass, catalog)
+
+  async def handle_reload(call: ServiceCall) -> None:
+    await _async_scan_assist_screens(hass, catalog)
+    for bridge in list(hass.data.get(DOMAIN, {}).get("entries", {}).values()):
+      await catalog.async_publish(bridge.base_topic)
+
+  if not hass.services.has_service(DOMAIN, SERVICE_RELOAD_ASSIST_SCREENS):
+    hass.services.async_register(DOMAIN, SERVICE_RELOAD_ASSIST_SCREENS, handle_reload)
+
+
 async def async_setup(hass: HomeAssistant, config: Dict[str, Any]) -> bool:
   """Set up the integration namespace and service."""
   domain_data = hass.data.setdefault(DOMAIN, {"entries": {}})
@@ -789,6 +829,8 @@ async def async_setup(hass: HomeAssistant, config: Dict[str, Any]) -> bool:
       EVENT_HOMEASSISTANT_STOP,
       _async_stop_camera_server,
     )
+
+  await _async_setup_assist_screens(hass, domain_data)
 
   if not hass.services.has_service(DOMAIN, SERVICE_PUBLISH_SNAPSHOT):
     async def handle_service(call: ServiceCall) -> None:
@@ -891,6 +933,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
   hass.data[DOMAIN].setdefault("platforms", {})[entry.entry_id] = platforms
   await hass.config_entries.async_forward_entry_setups(entry, platforms)
   await bridge.async_publish_config_to_device()
+  catalog = hass.data[DOMAIN].get(DATA_ASSIST_SCREENS)
+  if catalog is not None:
+    await catalog.async_publish(bridge.base_topic)
   return True
 
 
@@ -1452,6 +1497,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
   if unload_ok and bridge is not None:
     await bridge.async_unload()
     hass.data[DOMAIN]["entries"].pop(entry.entry_id, None)
+    catalog = hass.data[DOMAIN].get(DATA_ASSIST_SCREENS)
+    if catalog is not None:
+      catalog.forget(bridge.base_topic)
   if unload_ok:
     hass.data[DOMAIN].get(DATA_MQTT_ENTRIES, set()).discard(entry.entry_id)
   return unload_ok

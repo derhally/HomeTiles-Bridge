@@ -90,7 +90,8 @@ class AssistContractTest(unittest.TestCase):
                           "wake_words": None, "active_wake_words": None,
                           "chosen_wake_words": None, "wake_listen": None,
                           "mic_enabled": None,
-                          "screen_style": None, "screen_styles": None})
+                          "screen_style": None, "screen_styles": None,
+                          "screen_error": None})
         self.assertEqual(
             ASSIST.parse_status(json.dumps({"v": 1, "state": "idle", "id": ID,
                                             "error": "timeout"}).encode()),
@@ -98,7 +99,8 @@ class AssistContractTest(unittest.TestCase):
              "wake_words": None, "active_wake_words": None,
              "chosen_wake_words": None, "wake_listen": None,
              "mic_enabled": None,
-             "screen_style": None, "screen_styles": None})
+             "screen_style": None, "screen_styles": None,
+             "screen_error": None})
         self.assertEqual(ASSIST.parse_status(json.dumps({"v": 1, "state": "idle",
                                                          "error": "new_code"}))["error"],
                          "unknown")

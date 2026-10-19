@@ -265,6 +265,15 @@
           "aggressive": "Агрессивный",
           "relaxed": "Расслабленный"
         }
+      },
+      "assist_screen_style": {
+        "name": "Экран Assist",
+        "state": {
+          "atom": "Атом",
+          "reactor": "Реактор",
+          "dot_halo": "Ореол из точек",
+          "voice_pills": "Голосовые капсулы"
+        }
       }
     },
     "switch": {
@@ -311,6 +320,54 @@
       },
       "external_temperature": {
         "name": "Внешняя температура"
+      },
+      "battery_voltage": {
+        "name": "Напряжение батареи"
+      },
+      "wifi_rssi": {
+        "name": "Сигнал Wi-Fi"
+      },
+      "last_restart": {
+        "name": "Последний перезапуск"
+      },
+      "reset_reason": {
+        "name": "Причина перезапуска",
+        "state": {
+          "power_on": "Включение питания",
+          "external": "Внешний сброс",
+          "software": "Программный перезапуск",
+          "panic": "Сбой",
+          "interrupt_watchdog": "Watchdog прерываний",
+          "task_watchdog": "Watchdog задач",
+          "other_watchdog": "Другой watchdog",
+          "deep_sleep": "Выход из глубокого сна",
+          "brownout": "Просадка напряжения",
+          "sdio": "Сброс SDIO",
+          "usb": "Сброс USB",
+          "jtag": "Сброс JTAG",
+          "efuse": "Ошибка eFuse",
+          "power_glitch": "Сбой питания",
+          "cpu_lockup": "Блокировка CPU",
+          "unknown": "Неизвестно"
+        }
+      },
+      "free_internal_memory": {
+        "name": "Свободная внутренняя RAM"
+      },
+      "free_psram": {
+        "name": "Свободная PSRAM"
+      },
+      "chip_temperature": {
+        "name": "Температура чипа"
+      },
+      "ip_address": {
+        "name": "IP-адрес"
+      },
+      "firmware_version": {
+        "name": "Версия прошивки"
+      },
+      "mac_address": {
+        "name": "MAC-адрес"
       }
     },
     "assist_satellite": {
@@ -347,6 +404,12 @@
     },
     "speaker_not_connected": {
       "message": "Динамик дисплея недоступен: зашифрованное соединение не готово."
+    },
+    "announcement_not_sent": {
+      "message": "Объявление не доходит до дисплея: дисплей не в сети или зашифрованное соединение ещё не готово."
+    },
+    "announcement_not_played": {
+      "message": "Дисплею не удалось воспроизвести объявление ({error})."
     }
   }
 }

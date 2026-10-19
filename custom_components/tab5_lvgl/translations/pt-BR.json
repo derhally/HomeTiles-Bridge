@@ -265,6 +265,15 @@
           "aggressive": "Agressivo",
           "relaxed": "Relaxado"
         }
+      },
+      "assist_screen_style": {
+        "name": "Tela do Assist",
+        "state": {
+          "atom": "Átomo",
+          "reactor": "Reator",
+          "dot_halo": "Halo de pontos",
+          "voice_pills": "Pílulas de voz"
+        }
       }
     },
     "switch": {
@@ -311,6 +320,54 @@
       },
       "external_temperature": {
         "name": "Temperatura externa"
+      },
+      "battery_voltage": {
+        "name": "Tensão da bateria"
+      },
+      "wifi_rssi": {
+        "name": "Sinal Wi-Fi"
+      },
+      "last_restart": {
+        "name": "Última reinicialização"
+      },
+      "reset_reason": {
+        "name": "Motivo da reinicialização",
+        "state": {
+          "power_on": "Ligado",
+          "external": "Reset externo",
+          "software": "Reinicialização por software",
+          "panic": "Falha",
+          "interrupt_watchdog": "Watchdog de interrupção",
+          "task_watchdog": "Watchdog de tarefa",
+          "other_watchdog": "Outro watchdog",
+          "deep_sleep": "Despertar do sono profundo",
+          "brownout": "Queda de tensão",
+          "sdio": "Reset SDIO",
+          "usb": "Reset USB",
+          "jtag": "Reset JTAG",
+          "efuse": "Erro de eFuse",
+          "power_glitch": "Falha de alimentação",
+          "cpu_lockup": "Travamento da CPU",
+          "unknown": "Desconhecido"
+        }
+      },
+      "free_internal_memory": {
+        "name": "RAM interna livre"
+      },
+      "free_psram": {
+        "name": "PSRAM livre"
+      },
+      "chip_temperature": {
+        "name": "Temperatura do chip"
+      },
+      "ip_address": {
+        "name": "Endereço IP"
+      },
+      "firmware_version": {
+        "name": "Versão do firmware"
+      },
+      "mac_address": {
+        "name": "Endereço MAC"
       }
     },
     "assist_satellite": {
@@ -347,6 +404,12 @@
     },
     "speaker_not_connected": {
       "message": "Não é possível acessar o alto-falante da tela: a conexão criptografada não está pronta."
+    },
+    "announcement_not_sent": {
+      "message": "O anúncio não chega à tela: a tela está offline ou a conexão criptografada ainda não está pronta."
+    },
+    "announcement_not_played": {
+      "message": "A tela não conseguiu reproduzir o anúncio ({error})."
     }
   }
 }

@@ -8,3 +8,7 @@ publish_snapshot:
       selector:
         text:
           type: text
+
+reload_assist_screens:
+  name: Reload Assist screens
+  description: Read the Assist screen files in <config>/hometiles/assist_screens again and send them to every panel. Panels with screen file support list them after their built-in styles.

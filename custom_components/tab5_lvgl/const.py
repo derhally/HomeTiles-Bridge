@@ -79,6 +79,7 @@ CONF_ACCESS_CODES = "access_codes"
 DEFAULT_BASE = "hometiles"
 DEFAULT_PREFIX = "ha/statestream"
 SERVICE_PUBLISH_SNAPSHOT = "publish_snapshot"
+SERVICE_RELOAD_ASSIST_SCREENS = "reload_assist_screens"
 
 TOPIC_DISPLAY_BRIGHTNESS = "display_brightness"
 TOPIC_SCREENSAVER_BRIGHTNESS = "screensaver_brightness"

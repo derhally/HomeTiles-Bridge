@@ -6,8 +6,9 @@ is ``src/ui/assist/assist_screen_store.*`` and ``src/audio/assist_contract.h``
 in the firmware; the screen file format is
 ``tools/assist-screen-lab/FORMAT.md`` there.
 
-Users put screen files (``*.json``) in ``<config>/hometiles/assist_screens/``
-and run the ``reload_assist_screens`` service (or restart Home Assistant).
+Users put screen files (``*.json``) in ``<config>/hometiles/assist_screens/``.
+The Bridge looks at the folder every ``CHECK_INTERVAL_S`` seconds and sends
+what changed; the ``reload_assist_screens`` service does it at once.
 
 MQTT contract (base = the panel base topic), on the direct link and MQTT:
 - ``{base}/assist/screens``: Bridge to panel, retained JSON
@@ -36,6 +37,7 @@ ASSIST_SCREENS_DIR = ("hometiles", "assist_screens")
 MAX_SCREEN_BYTES = 24 * 1024
 MAX_SCREENS = 16
 MAX_NAME_BYTES = 32
+CHECK_INTERVAL_S = 60
 CATALOG_VERSION = 1
 # The panel's built-in styles (firmware assist_contract.h kScreenStyleIds):
 # a file cannot take their ids.
@@ -128,6 +130,11 @@ def scan_screens(directory: str) -> Tuple[List[ScreenFile], List[str]]:
         problems.extend(f"{s.id}: more than {MAX_SCREENS} screen files" for s in screens[MAX_SCREENS:])
         screens = screens[:MAX_SCREENS]
     return screens, problems
+
+
+def screens_key(screens: Iterable[ScreenFile]) -> Tuple[Tuple[str, str, str], ...]:
+    """What the panels see of a set of screens: a change means sending again."""
+    return tuple((s.id, s.name, s.digest) for s in screens)
 
 
 def build_catalog(screens: Iterable[ScreenFile]) -> str:

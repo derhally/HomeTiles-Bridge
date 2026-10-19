@@ -85,6 +85,14 @@ class ScanTest(unittest.TestCase):
             self.assertEqual(len(found), SCREENS.MAX_SCREENS)
             self.assertEqual(len(problems), 2)
 
+    def test_key_changes_with_content(self):
+        robot = SCREENS.read_screen("a", screen())[0]
+        same = SCREENS.read_screen("b", screen())[0]
+        edited = SCREENS.read_screen("a", screen(items=[{"type": "disc", "x": 0, "y": 0, "radius": 5}]))[0]
+        self.assertEqual(SCREENS.screens_key([robot]), SCREENS.screens_key([same]))
+        self.assertNotEqual(SCREENS.screens_key([robot]), SCREENS.screens_key([edited]))
+        self.assertNotEqual(SCREENS.screens_key([robot]), SCREENS.screens_key([]))
+
     def test_catalog(self):
         found = [SCREENS.read_screen("a", screen())[0]]
         self.assertEqual(json.loads(SCREENS.build_catalog(found)),
@@ -149,6 +157,10 @@ class WiringTest(unittest.TestCase):
         self.assertIn("SERVICE_RELOAD_ASSIST_SCREENS, handle_reload", init)
         self.assertIn("await catalog.async_publish(bridge.base_topic)", init)
         self.assertIn("catalog.forget(bridge.base_topic)", init)
+        # The folder is checked by itself; only changes are sent.
+        self.assertIn("async_track_time_interval(\n    hass, check_folder, timedelta(seconds=ASSIST_SCREENS_CHECK_S))", init)
+        self.assertIn("if screens_key(screens) == screens_key(catalog.screens):", init)
+        self.assertEqual(SCREENS.CHECK_INTERVAL_S, 60)
         services = (ROOT / "services.yaml").read_text(encoding="utf-8")
         self.assertIn("reload_assist_screens:", services)
 

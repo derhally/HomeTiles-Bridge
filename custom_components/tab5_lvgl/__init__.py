@@ -61,7 +61,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import discovery_flow
 from homeassistant.helpers import entity_registry as er
-from homeassistant.helpers.event import async_call_later, async_track_state_change_event
+from homeassistant.helpers.event import async_call_later, async_track_state_change_event, async_track_time_interval
 from homeassistant.helpers.start import async_at_started
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.sun import get_astral_event_date
@@ -269,7 +269,8 @@ from .speaker import (
   new_request_id,
 )
 from .assist import assist_command_topic
-from .assist_screens import ASSIST_SCREENS_DIR, AssistScreenCatalog, scan_screens
+from .assist_screens import ASSIST_SCREENS_DIR, AssistScreenCatalog, scan_screens, screens_key
+from .assist_screens import CHECK_INTERVAL_S as ASSIST_SCREENS_CHECK_S
 
 # hass.data[DOMAIN][DATA_ASSIST_SCREENS]: the offered Assist screen files.
 DATA_ASSIST_SCREENS = "assist_screens"
@@ -760,18 +761,25 @@ def _create_image_service(hass: HomeAssistant, runtime: LinkRuntime) -> ImageSer
   return ImageService(runtime.broker, source=source, render=render, allowed=allowed, track=track)
 
 
-async def _async_scan_assist_screens(hass: HomeAssistant, catalog: AssistScreenCatalog) -> None:
+async def _async_scan_assist_screens(hass: HomeAssistant, catalog: AssistScreenCatalog,
+                                     problems_seen: List[str]) -> bool:
+  """Reads the folder; True when the offered screens changed."""
   directory = hass.config.path(*ASSIST_SCREENS_DIR)
   try:
     screens, problems = await hass.async_add_executor_job(scan_screens, directory)
   except OSError as err:
     _LOGGER.warning("HomeTiles Assist screens: %s cannot be read: %s", directory, err)
-    return
+    return False
+  # Each problem is logged once, not at every check.
   for problem in problems:
-    _LOGGER.warning("HomeTiles Assist screen left out: %s", problem)
+    if problem not in problems_seen:
+      _LOGGER.warning("HomeTiles Assist screen left out: %s", problem)
+  problems_seen[:] = problems
+  if screens_key(screens) == screens_key(catalog.screens):
+    return False
   catalog.set_screens(screens)
-  if screens:
-    _LOGGER.info("HomeTiles Assist screens offered: %s", ", ".join(s.id for s in screens))
+  _LOGGER.info("HomeTiles Assist screens offered: %s", ", ".join(s.id for s in screens) or "none")
+  return True
 
 
 async def _async_setup_assist_screens(hass: HomeAssistant, domain_data: Dict[str, Any]) -> None:
@@ -784,12 +792,24 @@ async def _async_setup_assist_screens(hass: HomeAssistant, domain_data: Dict[str
 
   catalog = AssistScreenCatalog(publish)
   domain_data[DATA_ASSIST_SCREENS] = catalog
-  await _async_scan_assist_screens(hass, catalog)
+  problems_seen: List[str] = []
+  await _async_scan_assist_screens(hass, catalog, problems_seen)
 
-  async def handle_reload(call: ServiceCall) -> None:
-    await _async_scan_assist_screens(hass, catalog)
+  async def publish_all() -> None:
     for bridge in list(hass.data.get(DOMAIN, {}).get("entries", {}).values()):
       await catalog.async_publish(bridge.base_topic)
+
+  async def handle_reload(call: ServiceCall) -> None:
+    await _async_scan_assist_screens(hass, catalog, problems_seen)
+    await publish_all()
+
+  # Dropping a file in the folder is enough: the panels get it within a minute.
+  async def check_folder(_now: Any) -> None:
+    if await _async_scan_assist_screens(hass, catalog, problems_seen):
+      await publish_all()
+
+  domain_data["_assist_screens_unsub"] = async_track_time_interval(
+    hass, check_folder, timedelta(seconds=ASSIST_SCREENS_CHECK_S))
 
   if not hass.services.has_service(DOMAIN, SERVICE_RELOAD_ASSIST_SCREENS):
     hass.services.async_register(DOMAIN, SERVICE_RELOAD_ASSIST_SCREENS, handle_reload)

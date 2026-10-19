@@ -169,7 +169,7 @@ def wake_word_phrase(word_id: str) -> str:
     return wake_word_info(word_id)[0]
 
 
-def _wake_word_list(value: Any) -> list[str] | None:
+def _wake_word_list(value: Any, limit: int = WAKE_WORDS_MAX) -> list[str] | None:
     """Valid, unique ids of a status list; None when the field is not a list."""
     if not isinstance(value, list):
         return None
@@ -177,9 +177,14 @@ def _wake_word_list(value: Any) -> list[str] | None:
     for item in value:
         if valid_wake_word_id(item) and item not in words:
             words.append(item)
-            if len(words) >= WAKE_WORDS_MAX:
+            if len(words) >= limit:
                 break
     return words
+
+
+# Built-in styles plus the screen files a panel lists (assist_screens.py).
+SCREEN_STYLES_MAX = 9 + 16
+SCREEN_ERROR_MAX_CHARS = 96
 
 
 def clamp_max_ms(value: Any) -> int:
@@ -319,14 +324,21 @@ def parse_status(payload: Any) -> dict[str, Any] | None:
         mic_enabled = None
     # None = firmware without Assist screen styles. The ids follow the wake
     # word id rule ([a-z0-9_]{1,32}).
-    screen_styles = _wake_word_list(data.get("screen_styles"))
+    screen_styles = _wake_word_list(data.get("screen_styles"), SCREEN_STYLES_MAX)
     screen_style = data.get("screen_style")
     if screen_styles is None or screen_style not in screen_styles:
         screen_style = None
+    # Why the chosen screen file was refused (assist_screens.py); None when it shows.
+    screen_error = data.get("screen_error")
+    if not isinstance(screen_error, str) or not screen_error.strip() or screen_style is None:
+        screen_error = None
+    else:
+        screen_error = screen_error.strip()[:SCREEN_ERROR_MAX_CHARS]
     return {"state": state, "id": session_id, "error": error,
             "wake_words": available, "active_wake_words": active,
             "mic_enabled": mic_enabled,
-            "screen_style": screen_style, "screen_styles": screen_styles}
+            "screen_style": screen_style, "screen_styles": screen_styles,
+            "screen_error": screen_error}
 
 
 class WakeEvent(NamedTuple):

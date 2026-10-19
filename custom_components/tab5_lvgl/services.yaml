@@ -11,4 +11,4 @@ publish_snapshot:
 
 reload_assist_screens:
   name: Reload Assist screens
-  description: Read the Assist screen files in <config>/hometiles/assist_screens again and send them to every panel. Panels with screen file support list them after their built-in styles.
+  description: Read the Assist screen files in <config>/hometiles/assist_screens now and send them to every panel (the Bridge also checks the folder every minute). Panels with screen file support list them after their built-in styles.

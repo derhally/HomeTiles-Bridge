@@ -267,6 +267,15 @@
           "aggressive": "Agressif",
           "relaxed": "Détendu"
         }
+      },
+      "assist_screen_style": {
+        "name": "\u00c9cran Assist",
+        "state": {
+          "atom": "Atome",
+          "reactor": "R\u00e9acteur",
+          "dot_halo": "Halo de points",
+          "voice_pills": "Pilules vocales"
+        }
       }
     },
     "switch": {
@@ -313,6 +322,54 @@
       },
       "external_temperature": {
         "name": "Temp\u00e9rature externe"
+      },
+      "battery_voltage": {
+        "name": "Tension de la batterie"
+      },
+      "wifi_rssi": {
+        "name": "Signal Wi-Fi"
+      },
+      "last_restart": {
+        "name": "Dernier red\u00e9marrage"
+      },
+      "reset_reason": {
+        "name": "Raison du red\u00e9marrage",
+        "state": {
+          "power_on": "Mise sous tension",
+          "external": "R\u00e9initialisation externe",
+          "software": "Red\u00e9marrage logiciel",
+          "panic": "Plantage",
+          "interrupt_watchdog": "Watchdog d\u2019interruption",
+          "task_watchdog": "Watchdog de t\u00e2che",
+          "other_watchdog": "Autre watchdog",
+          "deep_sleep": "R\u00e9veil du sommeil profond",
+          "brownout": "Baisse de tension",
+          "sdio": "R\u00e9initialisation SDIO",
+          "usb": "R\u00e9initialisation USB",
+          "jtag": "R\u00e9initialisation JTAG",
+          "efuse": "Erreur eFuse",
+          "power_glitch": "Coupure d\u2019alimentation",
+          "cpu_lockup": "Blocage du CPU",
+          "unknown": "Inconnue"
+        }
+      },
+      "free_internal_memory": {
+        "name": "RAM interne libre"
+      },
+      "free_psram": {
+        "name": "PSRAM libre"
+      },
+      "chip_temperature": {
+        "name": "Temp\u00e9rature de la puce"
+      },
+      "ip_address": {
+        "name": "Adresse IP"
+      },
+      "firmware_version": {
+        "name": "Version du firmware"
+      },
+      "mac_address": {
+        "name": "Adresse MAC"
       }
     },
     "assist_satellite": {
@@ -349,6 +406,12 @@
     },
     "speaker_not_connected": {
       "message": "Le haut-parleur de l'écran est injoignable : la connexion chiffrée n'est pas prête."
+    },
+    "announcement_not_sent": {
+      "message": "L\u2019annonce n\u2019atteint pas l\u2019\u00e9cran : l\u2019\u00e9cran est hors ligne ou la connexion chiffr\u00e9e n\u2019est pas encore pr\u00eate."
+    },
+    "announcement_not_played": {
+      "message": "L\u2019\u00e9cran n\u2019a pas pu lire l\u2019annonce ({error})."
     }
   }
 }

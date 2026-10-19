@@ -267,6 +267,15 @@
           "aggressive": "Agressief",
           "relaxed": "Ontspannen"
         }
+      },
+      "assist_screen_style": {
+        "name": "Assist-scherm",
+        "state": {
+          "atom": "Atoom",
+          "reactor": "Reactor",
+          "dot_halo": "Puntenhalo",
+          "voice_pills": "Spraakpillen"
+        }
       }
     },
     "switch": {
@@ -313,6 +322,54 @@
       },
       "external_temperature": {
         "name": "Externe temperatuur"
+      },
+      "battery_voltage": {
+        "name": "Accuspanning"
+      },
+      "wifi_rssi": {
+        "name": "Wifi-signaal"
+      },
+      "last_restart": {
+        "name": "Laatste herstart"
+      },
+      "reset_reason": {
+        "name": "Reden van herstart",
+        "state": {
+          "power_on": "Inschakelen",
+          "external": "Externe reset",
+          "software": "Software-herstart",
+          "panic": "Crash",
+          "interrupt_watchdog": "Interrupt-watchdog",
+          "task_watchdog": "Taak-watchdog",
+          "other_watchdog": "Andere watchdog",
+          "deep_sleep": "Ontwaken uit diepe slaap",
+          "brownout": "Spanningsdip",
+          "sdio": "SDIO-reset",
+          "usb": "USB-reset",
+          "jtag": "JTAG-reset",
+          "efuse": "eFuse-fout",
+          "power_glitch": "Stroomstoring",
+          "cpu_lockup": "CPU-blokkade",
+          "unknown": "Onbekend"
+        }
+      },
+      "free_internal_memory": {
+        "name": "Vrij intern RAM"
+      },
+      "free_psram": {
+        "name": "Vrij PSRAM"
+      },
+      "chip_temperature": {
+        "name": "Chiptemperatuur"
+      },
+      "ip_address": {
+        "name": "IP-adres"
+      },
+      "firmware_version": {
+        "name": "Firmwareversie"
+      },
+      "mac_address": {
+        "name": "MAC-adres"
       }
     },
     "assist_satellite": {
@@ -349,6 +406,12 @@
     },
     "speaker_not_connected": {
       "message": "De luidspreker van het display is niet bereikbaar: de versleutelde verbinding is niet gereed."
+    },
+    "announcement_not_sent": {
+      "message": "De mededeling bereikt het scherm niet: het scherm is offline of de versleutelde verbinding is nog niet klaar."
+    },
+    "announcement_not_played": {
+      "message": "Het scherm kon de mededeling niet afspelen ({error})."
     }
   }
 }

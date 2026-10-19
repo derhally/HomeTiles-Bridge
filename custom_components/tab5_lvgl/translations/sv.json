@@ -267,6 +267,15 @@
           "aggressive": "Aggressiv",
           "relaxed": "Avslappnad"
         }
+      },
+      "assist_screen_style": {
+        "name": "Assist-skärm",
+        "state": {
+          "atom": "Atom",
+          "reactor": "Reaktor",
+          "dot_halo": "Punkthalo",
+          "voice_pills": "Röstpiller"
+        }
       }
     },
     "switch": {
@@ -313,6 +322,54 @@
       },
       "external_temperature": {
         "name": "Extern temperatur"
+      },
+      "battery_voltage": {
+        "name": "Batterispänning"
+      },
+      "wifi_rssi": {
+        "name": "Wi-Fi-signal"
+      },
+      "last_restart": {
+        "name": "Senaste omstart"
+      },
+      "reset_reason": {
+        "name": "Orsak till omstart",
+        "state": {
+          "power_on": "Påslagning",
+          "external": "Extern återställning",
+          "software": "Programomstart",
+          "panic": "Krasch",
+          "interrupt_watchdog": "Avbrotts-watchdog",
+          "task_watchdog": "Uppgifts-watchdog",
+          "other_watchdog": "Annan watchdog",
+          "deep_sleep": "Uppvaknande ur djupsömn",
+          "brownout": "Spänningsfall",
+          "sdio": "SDIO-återställning",
+          "usb": "USB-återställning",
+          "jtag": "JTAG-återställning",
+          "efuse": "eFuse-fel",
+          "power_glitch": "Strömstörning",
+          "cpu_lockup": "CPU-låsning",
+          "unknown": "Okänd"
+        }
+      },
+      "free_internal_memory": {
+        "name": "Ledigt internt RAM"
+      },
+      "free_psram": {
+        "name": "Ledigt PSRAM"
+      },
+      "chip_temperature": {
+        "name": "Chiptemperatur"
+      },
+      "ip_address": {
+        "name": "IP-adress"
+      },
+      "firmware_version": {
+        "name": "Firmwareversion"
+      },
+      "mac_address": {
+        "name": "MAC-adress"
       }
     },
     "assist_satellite": {
@@ -349,6 +406,12 @@
     },
     "speaker_not_connected": {
       "message": "Skärmens högtalare kan inte nås: den krypterade anslutningen är inte redo."
+    },
+    "announcement_not_sent": {
+      "message": "Meddelandet når inte skärmen: skärmen är offline eller den krypterade anslutningen är inte klar ännu."
+    },
+    "announcement_not_played": {
+      "message": "Skärmen kunde inte spela upp meddelandet ({error})."
     }
   }
 }

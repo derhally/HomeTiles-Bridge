@@ -267,6 +267,15 @@
           "aggressive": "Agresywny",
           "relaxed": "Swobodny"
         }
+      },
+      "assist_screen_style": {
+        "name": "Ekran Assist",
+        "state": {
+          "atom": "Atom",
+          "reactor": "Reaktor",
+          "dot_halo": "Aureola z kropek",
+          "voice_pills": "G\u0142osowe pigu\u0142ki"
+        }
       }
     },
     "switch": {
@@ -313,6 +322,54 @@
       },
       "external_temperature": {
         "name": "Temperatura zewn\u0119trzna"
+      },
+      "battery_voltage": {
+        "name": "Napi\u0119cie baterii"
+      },
+      "wifi_rssi": {
+        "name": "Sygna\u0142 Wi-Fi"
+      },
+      "last_restart": {
+        "name": "Ostatni restart"
+      },
+      "reset_reason": {
+        "name": "Przyczyna restartu",
+        "state": {
+          "power_on": "W\u0142\u0105czenie zasilania",
+          "external": "Reset zewn\u0119trzny",
+          "software": "Restart programowy",
+          "panic": "Awaria",
+          "interrupt_watchdog": "Watchdog przerwa\u0144",
+          "task_watchdog": "Watchdog zada\u0144",
+          "other_watchdog": "Inny watchdog",
+          "deep_sleep": "Wybudzenie z g\u0142\u0119bokiego u\u015bpienia",
+          "brownout": "Spadek napi\u0119cia",
+          "sdio": "Reset SDIO",
+          "usb": "Reset USB",
+          "jtag": "Reset JTAG",
+          "efuse": "B\u0142\u0105d eFuse",
+          "power_glitch": "Zak\u0142\u00f3cenie zasilania",
+          "cpu_lockup": "Zablokowanie CPU",
+          "unknown": "Nieznana"
+        }
+      },
+      "free_internal_memory": {
+        "name": "Wolna pami\u0119\u0107 RAM"
+      },
+      "free_psram": {
+        "name": "Wolna PSRAM"
+      },
+      "chip_temperature": {
+        "name": "Temperatura uk\u0142adu"
+      },
+      "ip_address": {
+        "name": "Adres IP"
+      },
+      "firmware_version": {
+        "name": "Wersja oprogramowania"
+      },
+      "mac_address": {
+        "name": "Adres MAC"
       }
     },
     "assist_satellite": {
@@ -349,6 +406,12 @@
     },
     "speaker_not_connected": {
       "message": "Głośnik wyświetlacza jest nieosiągalny: szyfrowane połączenie nie jest gotowe."
+    },
+    "announcement_not_sent": {
+      "message": "Komunikat nie dociera do wy\u015bwietlacza: wy\u015bwietlacz jest offline lub szyfrowane po\u0142\u0105czenie nie jest jeszcze gotowe."
+    },
+    "announcement_not_played": {
+      "message": "Wy\u015bwietlacz nie m\u00f3g\u0142 odtworzy\u0107 komunikatu ({error})."
     }
   }
 }

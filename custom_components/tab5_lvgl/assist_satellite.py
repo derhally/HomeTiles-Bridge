@@ -19,6 +19,11 @@ then the message on the panel's speaker with the same play command, one
 after the other, and returns once the panel reports each finished.
 ``start_conversation`` and ``ask_question`` announce first and then start a
 run without a wake word, like a button press.
+
+Timers: the satellite registers the panel for Home Assistant's timer events,
+so "set a timer" works on it, and passes the panel's timers on
+(voice_timers.py). The panel's controls start, pause, resume, cancel and
+extend them; once it rang, Home Assistant says which timer is done.
 """
 
 from __future__ import annotations
@@ -77,6 +82,7 @@ from .const import DOMAIN
 from .device_helpers import entry_base_topic, entry_device_id, entry_device_info, state_topic
 from .local_camera import RateLimitedWarnings, parse_connected
 from . import speaker
+from . import voice_timers
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -87,6 +93,8 @@ TTS_FINISH_TIMEOUT_S = 120.0
 # An announcement returns at the latest after this long per played file, so
 # a lost status never blocks the automation that announced.
 ANNOUNCE_FINISH_TIMEOUT_S = 300.0
+# Timers and their sound go to a panel this long after it connected.
+TIMER_CONNECT_DELAY_S = 3.0
 # Home Assistant converts the answer for the panel's decoder (mp3 or wav).
 _TTS_OPTIONS = {"preferred_format": "mp3"}
 
@@ -178,6 +186,10 @@ class HomeTilesAssistSatellite(AssistSatelliteEntity):
         # The chosen word stays while the listen switch is off.
         self._chosen_wake_words: list[str] = []
         self._wake_listen = False
+        # This panel's Home Assistant timers (voice_timers.py).
+        self._timers = voice_timers.PanelTimers()
+        self._timer_unregister = None
+        self._timer_device_id: str | None = None
 
     # Assist selects ------------------------------------------------------
 
@@ -275,13 +287,26 @@ class HomeTilesAssistSatellite(AssistSatelliteEntity):
             online = parse_connected(msg.payload)
             if online is None:
                 return
+            was_online = self._panel_online
             self._panel_online = online
             if not online:
                 self._end_session()
                 self._finish_tts()
                 self._fail_play_waiters()
+            elif was_online is not True:
+                # A panel keeps its timers in RAM: send them on every connect.
+                self.hass.async_create_task(self._async_send_timer_state())
             self._refresh_available()
             self.async_write_ha_state()
+
+        async def handle_timer_request(msg: mqtt.ReceiveMessage) -> None:
+            request = voice_timers.parse_request(msg.payload)
+            if request is None:
+                if self._warnings.allow("invalid_timer_request", monotonic()):
+                    _LOGGER.warning("HomeTiles timer request ignored for %s: invalid payload",
+                                    self._base)
+                return
+            await self._async_handle_timer_request(request)
 
         async def handle_speaker_status(msg: mqtt.ReceiveMessage) -> None:
             if not msg.payload:
@@ -311,6 +336,9 @@ class HomeTilesAssistSatellite(AssistSatelliteEntity):
             self.hass, state_topic(self._base, "connected"), handle_connected, qos=0))
         self._subscriptions.append(await mqtt.async_subscribe(
             self.hass, speaker.audio_status_topic(self._base), handle_speaker_status, qos=0))
+        self._subscriptions.append(await mqtt.async_subscribe(
+            self.hass, voice_timers.assist_timer_topic(self._base), handle_timer_request, qos=0))
+        self._register_timer_handler()
 
     async def async_will_remove_from_hass(self) -> None:
         satellites = self.hass.data.get(DOMAIN, {}).get(ASSIST_SATELLITES_KEY, {})
@@ -321,6 +349,10 @@ class HomeTilesAssistSatellite(AssistSatelliteEntity):
         self._cancel_tts_timer()
         self._tts_request_id = None
         self._fail_play_waiters()
+        if self._timer_unregister is not None:
+            self._timer_unregister()
+            self._timer_unregister = None
+        self._timers.clear()
         for unsubscribe in self._subscriptions:
             unsubscribe()
         self._subscriptions.clear()
@@ -420,6 +452,138 @@ class HomeTilesAssistSatellite(AssistSatelliteEntity):
         if not sent:
             raise HomeAssistantError(translation_domain=DOMAIN,
                                      translation_key="assist_not_connected")
+
+    # Timers --------------------------------------------------------------
+
+    def _timer_manager(self):
+        """Home Assistant's timer manager; None without the intent integration."""
+        try:
+            from homeassistant.components.intent import TIMER_DATA
+        except ImportError:
+            return None
+        data = getattr(self.hass, "data", None)
+        return data.get(TIMER_DATA) if isinstance(data, dict) else None
+
+    @callback
+    def _register_timer_handler(self) -> None:
+        registry_entry = getattr(self, "registry_entry", None)
+        device_id = getattr(registry_entry, "device_id", None)
+        if not device_id or self._timer_manager() is None:
+            _LOGGER.debug("HomeTiles timers for %s not registered: no intent integration or device",
+                          self._base)
+            return
+        from homeassistant.components.intent import async_register_timer_handler
+
+        self._timer_device_id = device_id
+        self._timer_unregister = async_register_timer_handler(
+            self.hass, device_id, self.handle_timer_event)
+
+    @callback
+    def handle_timer_event(self, event_type, timer) -> None:
+        """Home Assistant's timer events for this panel (the intent integration)."""
+        send = self._timers.handle_event(event_type, timer)
+        if send == "list":
+            self.hass.async_create_task(self._async_send_timers())
+        elif send == "done":
+            self.hass.async_create_task(self._async_send_timer_command(
+                voice_timers.build_done_command(timer)))
+
+    def timer_sound_option(self) -> str:
+        sounds = self.hass.data.get(DOMAIN, {}).get(voice_timers.TIMER_SOUNDS_KEY, {})
+        return sounds.get(self._entry_id) or voice_timers.DEFAULT_SOUND
+
+    async def async_send_timer_sound(self) -> bool:
+        """The finished-timer sound of the Timer sound select."""
+        if self._panel_online is not True:
+            return False  # Sent on the next connect.
+        return await self._async_send_timer_command(voice_timers.build_sound_command(
+            voice_timers.panel_sound(self.timer_sound_option())))
+
+    async def _async_send_timers(self) -> bool:
+        if self._panel_online is not True:
+            return False  # Sent on the next connect.
+        return await self._async_send_timer_command(
+            voice_timers.build_timers_command(self._timers.timers()))
+
+    async def _async_send_timer_state(self) -> None:
+        # The panel subscribes to its commands right after it connected.
+        await asyncio.sleep(TIMER_CONNECT_DELAY_S)
+        if self._panel_online is not True:
+            return
+        await self.async_send_timer_sound()
+        await self._async_send_timers()
+
+    async def _async_send_timer_command(self, payload: str) -> bool:
+        try:
+            sent = await self._async_send_assist(payload)
+        except Exception:  # noqa: BLE001 - the next change or connect sends again
+            _LOGGER.debug("HomeTiles timers for %s not sent", self._base, exc_info=True)
+            sent = False
+        if not sent and self._warnings.allow("timers_not_sent", monotonic()):
+            _LOGGER.warning("HomeTiles timers for %s not sent: panel not connected", self._base)
+        return sent
+
+    async def _async_handle_timer_request(self, request: dict) -> None:
+        op = request["op"]
+        manager = self._timer_manager()
+        try:
+            if op == "start":
+                if manager is None or self._timer_device_id is None:
+                    raise HomeAssistantError("timers unavailable")
+                manager.start_timer(self._timer_device_id, None, None, request["seconds"],
+                                    self.hass.config.language, name=request["name"])
+                return
+            timer_id = request["id"]
+            if op == "speak":
+                await self._async_speak_timer_done(timer_id)
+                return
+            if op == "play_sound":
+                await self._async_play_timer_sound()
+                return
+            # Only this panel's own timers.
+            if manager is None or not self._timers.owns(timer_id):
+                _LOGGER.debug("HomeTiles timer %s on %s ignored: not this panel's",
+                              timer_id, self._base)
+                return
+            if op == "pause":
+                manager.pause_timer(timer_id)
+            elif op == "resume":
+                manager.unpause_timer(timer_id)
+            elif op == "cancel":
+                manager.cancel_timer(timer_id)
+            elif op == "add":
+                manager.add_time(timer_id, request["seconds"])
+        except Exception as err:  # noqa: BLE001 - a lost timer must not break the topic
+            if self._warnings.allow(f"timer_{op}", monotonic()):
+                _LOGGER.warning("HomeTiles timer request %s on %s failed: %s",
+                                op, self._base, err)
+
+    async def _async_speak_timer_done(self, timer_id: str) -> None:
+        finished = self._timers.finished(timer_id)
+        if finished is None:
+            return
+        name, language = finished
+        await self.async_internal_announce(
+            message=voice_timers.done_phrase(name, language or self.hass.config.language),
+            preannounce=False)
+
+    async def _async_play_timer_sound(self) -> None:
+        """The user's own sound file, decoded by the Bridge for the panel."""
+        option = self.timer_sound_option()
+        if voice_timers.panel_sound(option) != voice_timers.SOUND_BRIDGE:
+            return
+        bridge = self._bridge()
+        create_stream = getattr(bridge, "async_create_audio_stream", None)
+        if not self._speaker_streams or create_stream is None:
+            if self._warnings.allow("timer_sound_stream", monotonic()):
+                _LOGGER.warning("HomeTiles timer sound %s for %s not played: the panel takes "
+                                "no Bridge streams", option, self._base)
+            return
+        path = self.hass.config.path(*voice_timers.SOUNDS_DIR, option)
+        url = await create_stream(path, speaker.AUDIO_RATE_MUSIC)
+        await speaker.async_publish_audio_command(
+            self.hass, bridge, self._paired, self._base,
+            speaker.build_play_command(speaker.new_request_id(), url), mqtt.async_publish)
 
     # Announcements -------------------------------------------------------
 

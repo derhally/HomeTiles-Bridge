@@ -279,6 +279,17 @@
           "lens": "Lens",
           "iris": "Iris"
         }
+      },
+      "timer_sound": {
+        "name": "Timergeluid",
+        "state": {
+          "rising_three": "Drie oplopend",
+          "kitchen_beep": "Keukenpiep",
+          "soft_bell": "Zachte bel",
+          "marimba": "Marimba",
+          "westminster": "Westminster",
+          "off": "Uit"
+        }
       }
     },
     "switch": {

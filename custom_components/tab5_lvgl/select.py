@@ -28,6 +28,7 @@ from .assist import (
     wake_choice,
 )
 from .capabilities import merged_capabilities_data, supports
+from .timer_sound_select import HomeTilesTimerSoundSelect
 from .view_navigation import ViewNavigation
 from .const import (
     DOMAIN,
@@ -68,6 +69,7 @@ async def async_setup_entry(
     if supports(capabilities, "audio_input"):
         entities.append(HomeTilesWakeWordSelect(entry, base_topic))
         entities.append(HomeTilesScreenStyleSelect(entry, base_topic))
+        entities.append(HomeTilesTimerSoundSelect(hass, entry))
         entities.extend(_assist_selects(hass, entry))
     if supports(capabilities, "display_theme"):
         entities.append(HomeTilesThemeSelect(entry, base_topic))

@@ -265,7 +265,7 @@ class AssistContractTest(unittest.TestCase):
                   for target in node.targets if isinstance(target, ast.Name)}
         self.assertIn("button", ast.literal_eval(values["PLATFORMS"]))
         self.assertNotIn("assist_satellite", ast.literal_eval(values["PLATFORMS"]))
-        self.assertEqual(ast.literal_eval(values["ASSIST_PLATFORMS"]), ["assist_satellite"])
+        self.assertEqual(ast.literal_eval(values["ASSIST_PLATFORMS"]), ["assist_satellite", "number"])
         manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
         self.assertIn("assist_satellite", manifest["after_dependencies"])
         self.assertIn("assist_pipeline", manifest["after_dependencies"])

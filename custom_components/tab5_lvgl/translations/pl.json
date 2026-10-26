@@ -329,6 +329,9 @@
     "number": {
       "display_brightness": {
         "name": "Jasno\u015b\u0107 wy\u015bwietlacza"
+      },
+      "timer_volume": {
+        "name": "G\u0142o\u015bno\u015b\u0107 minutnika"
       }
     },
     "sensor": {

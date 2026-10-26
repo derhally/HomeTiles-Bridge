@@ -329,6 +329,9 @@
     "number": {
       "display_brightness": {
         "name": "Schermhelderheid"
+      },
+      "timer_volume": {
+        "name": "Timervolume"
       }
     },
     "sensor": {

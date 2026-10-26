@@ -281,6 +281,17 @@
           "lens": "Soczewka",
           "iris": "T\u0119cz\u00f3wka"
         }
+      },
+      "timer_sound": {
+        "name": "D\u017awi\u0119k minutnika",
+        "state": {
+          "rising_three": "Trzy rosn\u0105ce",
+          "kitchen_beep": "Kuchenny sygna\u0142",
+          "soft_bell": "Delikatny dzwonek",
+          "marimba": "Marimba",
+          "westminster": "Westminster",
+          "off": "Wy\u0142\u0105czony"
+        }
       }
     },
     "switch": {

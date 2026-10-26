@@ -281,6 +281,17 @@
           "lens": "Lens",
           "iris": "Iris"
         }
+      },
+      "timer_sound": {
+        "name": "Timer sound",
+        "state": {
+          "rising_three": "Rising three",
+          "kitchen_beep": "Kitchen beep",
+          "soft_bell": "Soft bell",
+          "marimba": "Marimba",
+          "westminster": "Westminster",
+          "off": "Off"
+        }
       }
     },
     "switch": {

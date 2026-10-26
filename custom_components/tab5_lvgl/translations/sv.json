@@ -281,6 +281,17 @@
           "lens": "Lins",
           "iris": "Iris"
         }
+      },
+      "timer_sound": {
+        "name": "Timerljud",
+        "state": {
+          "rising_three": "Tre stigande",
+          "kitchen_beep": "Kökspip",
+          "soft_bell": "Mjuk klocka",
+          "marimba": "Marimba",
+          "westminster": "Westminster",
+          "off": "Av"
+        }
       }
     },
     "switch": {

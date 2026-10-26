@@ -330,6 +330,9 @@
     "number": {
       "display_brightness": {
         "name": "Яркость дисплея"
+      },
+      "timer_volume": {
+        "name": "Громкость таймера"
       }
     },
     "sensor": {

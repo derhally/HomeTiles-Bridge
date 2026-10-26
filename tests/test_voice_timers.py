@@ -79,7 +79,10 @@ class ContractTest(unittest.TestCase):
         for sound in ("rising_three", "kitchen_beep", "soft_bell", "marimba", "westminster",
                       "off", "bridge"):
             self.assertEqual(json.loads(TIMERS.build_sound_command(sound)),
-                             {"v": 1, "op": "timer_sound", "sound": sound})
+                             {"v": 1, "op": "timer_sound", "sound": sound, "volume": 60})
+        self.assertEqual(json.loads(TIMERS.build_sound_command("marimba", 35.4))["volume"], 35)
+        for bad, expected in ((150, 100), (-3, 0), (True, 60), (None, 60), (float("nan"), 60)):
+            self.assertEqual(TIMERS.clamp_volume(bad), expected, bad)
         with self.assertRaises(ValueError):
             TIMERS.build_sound_command("alarm.mp3")
 
@@ -262,7 +265,16 @@ class SatelliteTimersTest(unittest.IsolatedAsyncioTestCase):
         await self.connect()
         self.assertEqual([c["op"] for c in self.timer_ops()], ["timer_sound", "timers"])
         self.assertEqual(self.timer_ops()[0]["sound"], "bridge")
+        self.assertEqual(self.timer_ops()[0]["volume"], 60)
         self.assertEqual(self.timer_ops()[1]["timers"][0]["name"], "Pasta")
+        await satellite.async_will_remove_from_hass()
+
+    async def test_timer_volume_goes_with_the_sound(self):
+        satellite = await self.start(sound="soft_bell")
+        satellite.hass.data["tab5_lvgl"]["timer_volumes"] = {"e1": 25}
+        await self.connect()
+        [sound, _] = self.timer_ops()
+        self.assertEqual((sound["sound"], sound["volume"]), ("soft_bell", 25))
         await satellite.async_will_remove_from_hass()
 
     async def test_events_reach_the_panel(self):
@@ -347,6 +359,8 @@ class TranslationsTest(unittest.TestCase):
         for path in [root / "strings.json", *sorted((root / "translations").glob("*.json"))]:
             select = json.loads(path.read_text(encoding="utf-8"))["entity"]["select"]["timer_sound"]
             self.assertEqual(set(select["state"]), {*TIMERS.BUILTIN_SOUNDS, "off"}, path.name)
+            number = json.loads(path.read_text(encoding="utf-8"))["entity"]["number"]
+            self.assertTrue(number["timer_volume"]["name"].strip(), path.name)
 
 
 if __name__ == "__main__":

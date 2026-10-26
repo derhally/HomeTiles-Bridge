@@ -330,6 +330,9 @@
     "number": {
       "display_brightness": {
         "name": "Luminosit\u00e9 de l'\u00e9cran"
+      },
+      "timer_volume": {
+        "name": "Volume du minuteur"
       }
     },
     "sensor": {

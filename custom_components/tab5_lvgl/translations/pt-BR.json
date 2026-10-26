@@ -280,6 +280,17 @@
           "lens": "Lente",
           "iris": "Íris"
         }
+      },
+      "timer_sound": {
+        "name": "Som do timer",
+        "state": {
+          "rising_three": "Três ascendentes",
+          "kitchen_beep": "Bipe de cozinha",
+          "soft_bell": "Sino suave",
+          "marimba": "Marimba",
+          "westminster": "Westminster",
+          "off": "Desligado"
+        }
       }
     },
     "switch": {

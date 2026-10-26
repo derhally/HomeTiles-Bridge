@@ -280,6 +280,17 @@
           "lens": "Lente",
           "iris": "Iris"
         }
+      },
+      "timer_sound": {
+        "name": "Sonido del temporizador",
+        "state": {
+          "rising_three": "Tres ascendentes",
+          "kitchen_beep": "Pitido de cocina",
+          "soft_bell": "Campana suave",
+          "marimba": "Marimba",
+          "westminster": "Westminster",
+          "off": "Apagado"
+        }
       }
     },
     "switch": {

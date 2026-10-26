@@ -318,6 +318,7 @@ class AssistSelectsTest(unittest.IsolatedAsyncioTestCase):
             "HomeTilesViewSelect": lambda *args: "view",
             "HomeTilesWakeWordSelect": lambda *args: "wake_word",
             "HomeTilesScreenStyleSelect": lambda *args: "screen_style",
+            "HomeTilesTimerSoundSelect": lambda *args: "timer_sound",
             "TOPIC_SLEEP_MAINS": "sleep_mains",
         }
         tree = ast.parse((ROOT / "select.py").read_text(encoding="utf-8"))
@@ -346,12 +347,12 @@ class AssistSelectsTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_no_selects_without_assist_pipeline(self):
         _, created, _, _ = await self.created({"audio_input": True}, components=())
-        self.assertEqual(created, ["sleep", "wake_word", "screen_style"])
+        self.assertEqual(created, ["sleep", "wake_word", "screen_style", "timer_sound"])
 
     async def test_selects_join_the_panel_device(self):
         hass, created, PipelineSelect, VadSelect = await self.created({"audio_input": True})
-        self.assertEqual(created[1:3], ["wake_word", "screen_style"])
-        pipeline, vad = created[3:]
+        self.assertEqual(created[1:4], ["wake_word", "screen_style", "timer_sound"])
+        pipeline, vad = created[4:]
         self.assertIsInstance(pipeline, PipelineSelect)
         self.assertEqual(pipeline.args, (hass, "tab5_lvgl", "mac_assist"))
         self.assertIsInstance(vad, VadSelect)
@@ -1100,12 +1101,12 @@ class AssistSatellitePlatformTest(unittest.IsolatedAsyncioTestCase):
         satellite = await self.start()
         self.assertEqual(set(self.mqtt.subscriptions), {
             f"{BASE}/stat/assist_audio", f"{BASE}/stat/assist", f"{BASE}/stat/assist_wake",
-            f"{BASE}/stat/connected", f"{BASE}/stat/audio"})
+            f"{BASE}/stat/connected", f"{BASE}/stat/audio", f"{BASE}/stat/assist_timer"})
         # Microphone frames are binary.
         self.assertIsNone(self.mqtt.encodings[f"{BASE}/stat/assist_audio"])
         self.assertEqual(self.mqtt.encodings[f"{BASE}/stat/assist"], "utf-8")
         await satellite.async_will_remove_from_hass()
-        self.assertEqual(self.mqtt.unsubscribed, 5)
+        self.assertEqual(self.mqtt.unsubscribed, 6)
 
     async def test_tap_to_talk_run(self):
         satellite = await self.start()

@@ -280,6 +280,17 @@
           "lens": "Линза",
           "iris": "Радужка"
         }
+      },
+      "timer_sound": {
+        "name": "Звук таймера",
+        "state": {
+          "rising_three": "Три восходящих",
+          "kitchen_beep": "Кухонный сигнал",
+          "soft_bell": "Мягкий колокол",
+          "marimba": "Маримба",
+          "westminster": "Вестминстер",
+          "off": "Выкл."
+        }
       }
     },
     "switch": {

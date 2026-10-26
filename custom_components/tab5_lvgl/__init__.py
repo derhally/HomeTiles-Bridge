@@ -336,8 +336,9 @@ CAMERA_SOUND_PROBE_CACHE_SECONDS = 600.0
 PLATFORMS = ["light", "select", "switch", "sensor", "binary_sensor", "camera", "media_player",
              "button"]
 # Forwarded only for panels that announce a microphone, so Home Assistant
-# loads Assist (STT, TTS, conversation) only where it can be used.
-ASSIST_PLATFORMS = ["assist_satellite"]
+# loads Assist (STT, TTS, conversation) only where it can be used. The number
+# platform holds only the voice timers' Timer volume.
+ASSIST_PLATFORMS = ["assist_satellite", "number"]
 
 MEDIA_COVER_MAX_BYTES = 14000
 # Home Assistant sends SUBSCRIBE packets batched, a moment after async_subscribe

@@ -11,6 +11,7 @@ from homeassistant.helpers.entity import EntityCategory
 
 # MQTT calls also reach panels on the direct link (link_mqtt.py).
 from . import link_mqtt as mqtt
+from .capabilities import merged_capabilities_data, supports
 from .const import TOPIC_DISPLAY_BRIGHTNESS
 from .device_helpers import (
     command_topic,
@@ -50,7 +51,13 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities
 ) -> None:
     base_topic = entry_base_topic(entry)
-    async_add_entities([Tab5BrightnessNumber(entry, base_topic)])
+    entities = [Tab5BrightnessNumber(entry, base_topic)]
+    if supports(merged_capabilities_data(entry), "audio_input"):
+        # Lazy import: RestoreNumber is only needed with the panel's Assist.
+        from .timer_volume_number import HomeTilesTimerVolumeNumber
+
+        entities.append(HomeTilesTimerVolumeNumber(entry))
+    async_add_entities(entities)
 
 
 class Tab5BrightnessNumber(NumberEntity):

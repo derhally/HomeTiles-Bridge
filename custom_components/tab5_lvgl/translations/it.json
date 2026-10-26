@@ -328,6 +328,9 @@
     "number": {
       "display_brightness": {
         "name": "Luminosità del display"
+      },
+      "timer_volume": {
+        "name": "Volume del timer"
       }
     },
     "sensor": {

@@ -328,6 +328,9 @@
     "number": {
       "display_brightness": {
         "name": "Brillo de la pantalla"
+      },
+      "timer_volume": {
+        "name": "Volumen del temporizador"
       }
     },
     "sensor": {

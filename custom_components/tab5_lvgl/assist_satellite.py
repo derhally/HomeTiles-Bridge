@@ -492,12 +492,16 @@ class HomeTilesAssistSatellite(AssistSatelliteEntity):
         sounds = self.hass.data.get(DOMAIN, {}).get(voice_timers.TIMER_SOUNDS_KEY, {})
         return sounds.get(self._entry_id) or voice_timers.DEFAULT_SOUND
 
+    def timer_volume(self) -> int:
+        volumes = self.hass.data.get(DOMAIN, {}).get(voice_timers.TIMER_VOLUMES_KEY, {})
+        return voice_timers.clamp_volume(volumes.get(self._entry_id, voice_timers.DEFAULT_VOLUME))
+
     async def async_send_timer_sound(self) -> bool:
-        """The finished-timer sound of the Timer sound select."""
+        """The finished-timer sound and volume (Timer sound, Timer volume)."""
         if self._panel_online is not True:
             return False  # Sent on the next connect.
         return await self._async_send_timer_command(voice_timers.build_sound_command(
-            voice_timers.panel_sound(self.timer_sound_option())))
+            voice_timers.panel_sound(self.timer_sound_option()), self.timer_volume()))
 
     async def _async_send_timers(self) -> bool:
         if self._panel_online is not True:

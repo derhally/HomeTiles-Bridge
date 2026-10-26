@@ -11,7 +11,7 @@ Contract v1, the firmware's src/audio/voice_timer_contract.h:
       {"v":1,"op":"timers","timers":[{"id":..,"total":600,"left":272,
           "active":true,"name":"Pasta"},...]}   on every change and connect
       {"v":1,"op":"timer_done","id":..,"total":600,"name":"Pasta"}
-      {"v":1,"op":"timer_sound","sound":"rising_three"}
+      {"v":1,"op":"timer_sound","sound":"rising_three","volume":60}
   {base}/stat/assist_timer   panel -> Bridge, not retained:
       {"v":1,"op":"start","seconds":300[,"name":"Pasta"]}
       {"v":1,"op":"pause"|"resume"|"cancel"|"speak"|"play_sound","id":..}
@@ -54,6 +54,9 @@ SOUND_EXTENSIONS = (".mp3", ".wav", ".ogg", ".oga", ".flac", ".m4a")
 MAX_SOUND_FILES = 32
 MAX_SOUND_FILE_BYTES = 4 * 1024 * 1024
 TIMER_SOUNDS_KEY = "timer_sounds"
+TIMER_VOLUMES_KEY = "timer_volumes"
+# Timer volume in percent: its own level, apart from the media volume.
+DEFAULT_VOLUME = 60
 
 _ID_CHARS = frozenset("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
 _ACTIONS = frozenset({"pause", "resume", "cancel", "speak", "play_sound"})
@@ -81,6 +84,16 @@ def assist_timer_topic(base_topic: str) -> str:
 
 def timer_sound_select_unique_id(device_id: str) -> str:
     return f"{device_id}_timer_sound"
+
+
+def timer_volume_number_unique_id(device_id: str) -> str:
+    return f"{device_id}_timer_volume"
+
+
+def clamp_volume(value: Any) -> int:
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or value != value:
+        return DEFAULT_VOLUME
+    return max(0, min(100, int(round(value))))
 
 
 def valid_timer_id(value: Any) -> bool:
@@ -146,10 +159,11 @@ def build_done_command(timer: Any) -> str:
     return _encode(payload)
 
 
-def build_sound_command(sound: str) -> str:
+def build_sound_command(sound: str, volume: Any = DEFAULT_VOLUME) -> str:
     if sound not in PANEL_SOUNDS:
         raise ValueError("invalid_timer_sound")
-    return _encode({"v": TIMER_PROTOCOL_VERSION, "op": "timer_sound", "sound": sound})
+    return _encode({"v": TIMER_PROTOCOL_VERSION, "op": "timer_sound", "sound": sound,
+                    "volume": clamp_volume(volume)})
 
 
 def parse_request(payload: Any) -> dict[str, Any] | None:

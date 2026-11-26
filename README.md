@@ -125,6 +125,17 @@ The map is drawn from Natural Earth (public domain), the names use the Inter fon
 
 Displays whose firmware supports screen files (test builds with `HOMETILES_ASSIST_DATA_SCREENS`) can show Assist screens kept in Home Assistant. Put the screen files (`*.json`, at most 24 KB each, format described in the firmware's `tools/assist-screen-lab/FORMAT.md`) in `<config>/hometiles/assist_screens/`. The Bridge checks the folder every minute (the **Reload Assist screens** action, `tab5_lvgl.reload_assist_screens`, does it at once) and sends new and changed files to every display, which lists them after its built-in styles in its Settings and in the **Assist screen** select. Each file needs its own `id`; the built-in style names are taken, and at most 16 files are offered. Files that cannot be offered are named in the Home Assistant log, and a file the display refuses shows as the select's `screen_error` attribute.
 
+### Voice access per display
+
+Home Assistant decides with one exposure list which entities Assist may reach, for every voice device alike. The Bridge adds the LLM API **HomeTiles room control**, which gives each display its own lists instead:
+
+1. **Configure → Voice access (this display)**: choose what the display's voice assistant may **control** and what it may only **read**, each by areas, labels and single entities. Nothing selected means no devices. Locks and alarm panels are only read.
+2. Add a conversation agent with an LLM (Ollama, OpenAI, Anthropic, ...) and tick only **HomeTiles room control** under *Control Home Assistant*.
+3. Make an Assist pipeline with that agent and **Prefer handling commands locally** switched off; Home Assistant's own command handling can reach every exposed entity.
+4. Pick that pipeline in the display's **Assistant** select.
+
+The API knows which display speaks and checks every request against that display's lists before it calls a fixed set of services (on/off, light brightness and color, cover position, thermostat, media, fan speed, scenes, scripts and buttons). Timers keep working on the display that started them; a timer cannot carry a command to run when it ends. A request that does not come from a display, such as typed chat, gets no devices.
+
 ## MQTT Topics
 
 The integration and the display exchange these topics over MQTT, or, for a display on the direct link (HomeTiles v0.9.0 or newer), with the same topics over the display's own connection to the Bridge (TCP port 8140, or up to 8147 when it is taken):

@@ -115,6 +115,7 @@ def _entity_facts(hass: HomeAssistant, wanted: scope_rules.VoiceScope) -> List[E
       label_ids=tuple(entry.labels or ()),
       aliases=tuple(alias for alias in (entry.aliases or ()) if isinstance(alias, str)),
       hidden=entry.hidden_by is not None,
+      auxiliary=getattr(entry, "entity_category", None) is not None,
     ))
   return facts
 

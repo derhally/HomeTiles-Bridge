@@ -129,7 +129,7 @@ Displays whose firmware supports screen files (test builds with `HOMETILES_ASSIS
 
 Home Assistant decides with one exposure list which entities Assist may reach, for every voice device alike. The Bridge adds the LLM API **HomeTiles room control**, which gives each display its own lists instead:
 
-1. **Configure → Voice access (this display)**: choose what the display's voice assistant may **control** and what it may only **read**, each by areas, labels and single entities. Nothing selected means no devices. Locks and alarm panels are only read.
+1. **Configure → Voice access (this display)**: choose what the display's voice assistant may **control** and what it may only **read**, each by areas, labels and single entities. Nothing selected means no devices. Areas and labels leave out hidden, config and diagnostic entities; pick those one by one. Locks and alarm panels are only read.
 2. Add a conversation agent with an LLM (Ollama, OpenAI, Anthropic, ...) and tick only **HomeTiles room control** under *Control Home Assistant*.
 3. Make an Assist pipeline with that agent and **Prefer handling commands locally** switched off; Home Assistant's own command handling can reach every exposed entity.
 4. Pick that pipeline in the display's **Assistant** select.

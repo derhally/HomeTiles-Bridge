@@ -62,6 +62,8 @@ class ScopeRuleTests(unittest.TestCase):
             Facts("sensor.outside", "Outside"),
             Facts("light.kids_hidden", "Hidden", area_id="kids", hidden=True),
             Facts("light.hall_hidden", "Hidden hall", area_id="hall", hidden=True),
+            Facts("button.kids_factory_reset", "Factory reset", area_id="kids", auxiliary=True),
+            Facts("light.status_led", "Status LED", area_id="kids", auxiliary=True),
         ]
         result = SCOPE.scoped_entities(scope, facts)
         control = {entity_id for entity_id, item in result.items() if item.can_control}
@@ -71,6 +73,8 @@ class ScopeRuleTests(unittest.TestCase):
                          "Read lists, sensors in a control area, and locks are only read")
         self.assertNotIn("light.kitchen", result, "Outside every list")
         self.assertNotIn("light.kids_hidden", result, "Hidden entities only when named one by one")
+        self.assertNotIn("button.kids_factory_reset", result, "Config and diagnostic entities neither")
+        self.assertNotIn("light.status_led", result)
 
 
 class ResolveTests(unittest.TestCase):

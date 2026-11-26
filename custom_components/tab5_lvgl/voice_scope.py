@@ -176,19 +176,21 @@ class EntityFacts:
   label_ids: Tuple[str, ...] = ()
   aliases: Tuple[str, ...] = ()
   hidden: bool = False
+  # Config or diagnostic entity (factory reset buttons, status LEDs).
+  auxiliary: bool = False
 
 
 def scoped_entities(scope: VoiceScope, facts: Iterable[EntityFacts]) -> Dict[str, ScopedEntity]:
   """Every entity one of the panel's lists holds, by entity id. An entity in
   a control list whose domain has no control tool (a sensor) is only read;
-  hidden entities count only when named one by one."""
+  hidden, config and diagnostic entities count only when named one by one."""
   result: Dict[str, ScopedEntity] = {}
   for item in facts:
     domain = entity_domain(item.entity_id)
     if not domain:
       continue
     by_name = item.entity_id in scope.control.entities or item.entity_id in scope.read.entities
-    if item.hidden and not by_name:
+    if (item.hidden or item.auxiliary) and not by_name:
       continue
     control = scope.control.matches(item.entity_id, item.area_id, item.label_ids)
     read = control or scope.read.matches(item.entity_id, item.area_id, item.label_ids)

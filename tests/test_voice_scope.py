@@ -108,6 +108,39 @@ class ResolveTests(unittest.TestCase):
                 self.resolve(empty)
 
 
+class SpokenNameTests(unittest.TestCase):
+    """The model must not swap a named device for a similar allowed one."""
+
+    FACTS = [
+        Facts("light.desk_lights", "Desk Lights", area_id="office", area_name="Office"),
+        Facts("light.worktable_left", "Worktable Light Left", area_id="office", area_name="Office"),
+        Facts("light.office_ceiling", "Ceiling Light", area_id="office", area_name="Office"),
+        Facts("light.kitchen_ceiling", "Ceiling Light", area_id="kitchen", area_name="Kitchen"),
+        Facts("light.desk_lamp", "Desk lamp", area_id="den", area_name="Den"),
+        Facts("switch.worktable_saw", "Worktable", area_id="garage", area_name="Garage"),
+    ]
+
+    def setUp(self):
+        scope = SCOPE.scope_from_config({"voice_control_entities": ["light.desk_lights", "light.office_ceiling"]})
+        self.entities = SCOPE.scoped_entities(scope, self.FACTS)
+
+    def check(self, spoken, entity_id):
+        SCOPE.check_spoken_name(spoken, self.entities[entity_id], self.FACTS, self.entities)
+
+    def test_swapped_devices_are_refused(self):
+        for spoken, chosen in (("worktable light", "light.desk_lights"), ("the worktable lights", "light.desk_lights"),
+                               ("kitchen ceiling light", "light.office_ceiling")):
+            with self.subTest(spoken=spoken), self.assertRaisesRegex(SCOPE.VoiceRefusal, "do not use another"):
+                self.check(spoken, chosen)
+
+    def test_fitting_names_pass(self):
+        for spoken, chosen in (("desk lights", "light.desk_lights"), ("Desk light", "light.desk_lights"),
+                               ("ceiling light", "light.office_ceiling"), ("office ceiling light", "light.office_ceiling"),
+                               ("the light", "light.desk_lights"), (None, "light.desk_lights"), ("", "light.desk_lights")):
+            with self.subTest(spoken=spoken):
+                self.check(spoken, chosen)
+
+
 class PlanTests(unittest.TestCase):
     def test_turn(self):
         plan = SCOPE.plan_turn
@@ -451,8 +484,11 @@ class ApiWiringTests(unittest.TestCase):
 
     def test_calls_are_checked_against_the_lists(self):
         turn_on = self.tool(self.instance("dev_kids"), "turn_on")
-        result = call(turn_on, self.hass, "dev_kids", entity="light.kids")
+        result = call(turn_on, self.hass, "dev_kids", entity="light.kids", spoken_name="kids light")
         self.assertTrue(result.data["success"])
+        refused = call(turn_on, self.hass, "dev_kids", entity="light.kids", spoken_name="kitchen light")
+        self.assertTrue(refused.error, "A swapped device is refused")
+        self.assertIn("do not use another", refused.data["error"])
         self.assertEqual(self.hass.services.calls, [("light", "turn_on", {"entity_id": "light.kids"})])
         for entity in ("light.kitchen", "Kitchen light", "sensor.outside"):
             result = call(turn_on, self.hass, "dev_kids", entity=entity)

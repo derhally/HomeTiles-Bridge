@@ -246,6 +246,46 @@ def resolve_entity(query: Any, entities: Mapping[str, ScopedEntity], *, area: An
   raise VoiceRefusal(f"'{query}' matches more than one device: {choices}. Ask which one.")
 
 
+# Words that name no particular device; "the desk light" and "desk" count
+# the same.
+_FILLER = frozenset({"the", "a", "an", "my", "in", "on", "of", "please", "light", "lights", "lamp",
+                     "lamps", "switch", "device", "one"})
+
+
+def _words(*texts: Any) -> frozenset:
+  words = set()
+  for text in texts:
+    for word in _fold(text).split():
+      if len(word) > 3 and word.endswith("s"):
+        word = word[:-1]
+      words.add(word)
+  return frozenset(words)
+
+
+def _name_score(spoken: frozenset, name: str, area: str, aliases: Sequence[str]) -> int:
+  """How many of the spoken words the device's name, area or aliases hold;
+  only words that tell devices apart count."""
+  return len((spoken - _FILLER) & _words(name, area, *aliases))
+
+
+def check_spoken_name(spoken: Any, chosen: ScopedEntity, facts: Iterable["EntityFacts"],
+                      entities: Mapping[str, ScopedEntity]) -> None:
+  """A model may map a device the user named to a similar one it is
+  allowed to use ("worktable light" to the Desk Lights). When the user's
+  own words fit a device outside the panel's lists better than the chosen
+  one, the call is refused instead."""
+  words = _words(spoken)
+  if not (words - _FILLER):
+    return
+  mine = _name_score(words, chosen.name, chosen.area, chosen.aliases)
+  for item in facts:
+    if item.entity_id in entities or entity_domain(item.entity_id) != chosen.domain:
+      continue
+    if _name_score(words, item.name, item.area_name, item.aliases) > mine:
+      raise VoiceRefusal(f"'{spoken}' is not something this panel's voice assistant may use; "
+                         f"do not use another device instead.")
+
+
 def _features(attributes: Mapping[str, Any]) -> int:
   value = attributes.get("supported_features", 0)
   return value if isinstance(value, int) and not isinstance(value, bool) else 0
@@ -484,8 +524,9 @@ def build_prompt(panel_name: str, entities: Mapping[str, ScopedEntity],
     + (f" in the area '{area}'" if area else "") + ".",
     "You may only use the Home Assistant devices listed below; everything else in the home is off limits,"
     " so say you cannot do that instead of guessing.",
-    "Pass the entity_id from the list to the tools. 'control' devices can be changed, 'read' devices"
-    " can only be reported.",
+    "Pass the entity_id from the list to the tools, and the device name in the user's own words as"
+    " spoken_name. Never use a different device in place of one the user named.",
+    "'control' devices can be changed, 'read' devices can only be reported.",
   ]
   if area:
     lines.append(f"When the user does not name an area, prefer devices in '{area}'.")

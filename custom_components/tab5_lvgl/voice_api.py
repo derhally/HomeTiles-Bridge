@@ -16,7 +16,7 @@ would run through the default agent and its exposure list.
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import area_registry as ar
@@ -121,13 +121,20 @@ def _entity_facts(hass: HomeAssistant, wanted: scope_rules.VoiceScope) -> List[E
 
 
 @callback
-def scoped_for_entry(hass: HomeAssistant, entry: Any) -> Dict[str, scope_rules.ScopedEntity]:
+def scoped_facts_for_entry(hass: HomeAssistant, entry: Any) -> Tuple[List[EntityFacts], Dict[str, scope_rules.ScopedEntity]]:
+  """Every entity's registry facts and the panel's scoped entities."""
   if entry is None:
-    return {}
+    return [], {}
   scope = scope_rules.scope_from_config(entry.data)
   if scope.empty:
-    return {}
-  return scope_rules.scoped_entities(scope, _entity_facts(hass, scope))
+    return [], {}
+  facts = _entity_facts(hass, scope)
+  return facts, scope_rules.scoped_entities(scope, facts)
+
+
+@callback
+def scoped_for_entry(hass: HomeAssistant, entry: Any) -> Dict[str, scope_rules.ScopedEntity]:
+  return scoped_facts_for_entry(hass, entry)[1]
 
 
 @callback
@@ -153,7 +160,12 @@ class _ScopedTool(llm.Tool):
     args = dict(tool_input.tool_args or {})
     entry = panel_entry_for_device(hass, llm_context.device_id)
     try:
-      item = scope_rules.resolve_entity(args.get("entity"), scoped_for_entry(hass, entry), area=args.get("area"))
+      facts, entities = scoped_facts_for_entry(hass, entry)
+      item = scope_rules.resolve_entity(args.get("entity") or args.get("spoken_name"), entities,
+                                        area=args.get("area"))
+      if not self.read_only:
+        # Reading a near match does no harm; switching one does.
+        scope_rules.check_spoken_name(args.get("spoken_name"), item, facts, entities)
       state = hass.states.get(item.entity_id)
       value = state.state if state is not None else None
       attributes = dict(state.attributes) if state is not None else {}
@@ -173,12 +185,14 @@ class _ScopedTool(llm.Tool):
 
 
 _ENTITY = "The entity_id from the device list (or the device's name)."
+_SPOKEN = "The device's name exactly in the user's words, for example 'worktable light'."
 _AREA = "Optional area name, only when a name fits devices in several areas."
 
 
 def _schema(extra: Dict[Any, Any] | None = None) -> Any:
   fields: Dict[Any, Any] = {
     vol.Required("entity", description=_ENTITY): str,
+    vol.Required("spoken_name", description=_SPOKEN): str,
     vol.Optional("area", description=_AREA): str,
   }
   fields.update(extra or {})

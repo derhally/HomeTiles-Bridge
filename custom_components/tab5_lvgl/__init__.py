@@ -302,6 +302,7 @@ from .announcement_guard import (
 from .local_camera import is_local_camera_self_loop, local_camera_command_topic
 from . import entity_icons
 from . import entity_search
+from .voice_api import async_register_voice_api
 from .speaker import (
   AUDIO_RATE_SPEECH,
   AUDIO_STREAM_TRANSPORT,
@@ -1025,6 +1026,8 @@ async def async_setup(hass: HomeAssistant, config: Dict[str, Any]) -> bool:
     )
 
   await _async_setup_assist_screens(hass, domain_data)
+  # The per-panel LLM API for voice assistants (voice_api.py).
+  async_register_voice_api(hass, domain_data)
 
   if not hass.services.has_service(DOMAIN, SERVICE_PUBLISH_SNAPSHOT):
     async def handle_service(call: ServiceCall) -> None:
